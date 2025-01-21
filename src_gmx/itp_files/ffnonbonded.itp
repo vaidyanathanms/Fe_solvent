@@ -1,0 +1,11 @@
+[ atomtypes ] 
+; name at.num  mass   charge  ptype    sigma         epsilon 
+MG      12 	24.30500     	 1.600   A	   1.64447e-01     3.66118e+00  ; Mg-Metal Zeron J Chem Phys FF based on TIP4P
+FE      26 	55.8450     	 1.600   A	   1.40900e-01     7.19648e-01  ; Fe-Metal Table 8 Li JCTC 2013 PME compatible LJ
+FC	9   	18.998400	-0.128	 A  	   2.95000e-01     2.21750e-01  ; F-TFSI
+CF	6   	12.011000  	+0.280	 A	   3.50000e-01     2.76144e-01  ; C-TFSI
+SO	16  	32.060000   	+0.816	 A	   3.55000e-01     10.4600e-01  ; S-TFSI
+OS	8   	15.999400   	-0.424 	 A	   2.96000e-01     8.78640e-01  ; O-TFSI
+NS	7	14.006700 	-0.528	 A	   3.25000e-01     7.11280e-01  ; N-TFSI	
+OW     	8      	15.99940    	-0.834   A    	   3.15061e-01     6.36386e-01  ; H2O-O
+HW     	1       1.00800     	 0.417   A    	   1.00000e-01     0.00000e+00  ; H2O-H
