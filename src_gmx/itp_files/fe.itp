@@ -4,4 +4,4 @@ FE             1
 
 [ atoms ]
 ; id    at type     res nr  residu name at name  cg nr  charge   mass
-1       FE    1       MG          MG       1      1.6        55.845
+1       FE    1       FE          FE       1      1.6        55.845
