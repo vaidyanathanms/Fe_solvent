@@ -1,0 +1,35 @@
+#
+# A mixture of fecl and DES
+#
+
+# All the atoms from diferent molecules will be separated at least 2.0
+# Anstroms at the solution.
+
+tolerance 2.0
+
+# The file type of input and output files is PDB
+
+filetype pdb
+
+# The name of the output file
+
+output FeTFSI.pdb
+
+# 20 fecl2 with 100 chCl molecules 30. 30. 30. 
+
+
+structure pdb_files/Fe_ideal.pdb
+  number 20
+  inside box 0. 0. 0. 64 64 64
+end structure
+
+structure pdb_files/tfsi.pdb 
+  number 40 
+  inside box 0. 0. 0. 64 64 64 
+end structure
+
+structure pdb_files/tip3p.pdb
+  number 100
+  inside box 0. 0. 0. 64 64 64
+end structure
+
