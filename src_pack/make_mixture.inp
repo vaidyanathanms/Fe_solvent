@@ -15,21 +15,21 @@ filetype pdb
 
 output FeTFSI.pdb
 
-# 20 fecl2 with 100 chCl molecules 30. 30. 30. 
+# molality: 0.1. 
 
 
 structure pdb_files/Fe_ideal.pdb
-  number 20
-  inside box 0. 0. 0. 64 64 64
+  number 30
+  inside box 0. 0. 0. 90 90 90
 end structure
 
 structure pdb_files/tfsi.pdb 
-  number 40 
-  inside box 0. 0. 0. 64 64 64 
+  number 60 
+  inside box 0. 0. 0. 90 90 90 
 end structure
 
 structure pdb_files/tip3p.pdb
-  number 100
-  inside box 0. 0. 0. 64 64 64
+  number 16653
+  inside box 0. 0. 0. 90 90 90
 end structure
 

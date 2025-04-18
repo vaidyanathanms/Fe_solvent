@@ -1,10 +1,8 @@
 [ atomtypes ] 
 ; name at.num  mass   charge  ptype    sigma         epsilon 
 MG      12 	24.30500     	 1.600   A	   1.64447e-01     3.66118e+00  ; Mg-Metal Zeron J Chem Phys FF based on TIP4P
-FE2     26 	55.8450     	 1.600   A	   2.41078e-01     3.09404e-02  ; Fe-2+Metal Note conversions: Table 8 Li JCTC 2013 PME compatible LJ
+FE2     26 	55.8450     	 1.600   A	   2.43244e-01     7.19648e-02  ; Fe-2+Metal Note conversions: Table 8 Li JCTC 2013 PME compatible LJ
 FE3     26 	55.8450     	 2.400   A	   1.40900e-01     7.19648e-01  ; Fe-3+Metal Table 8 Li JCTC 2013 PME compatible LJ
-FE2P    26      55.854000        1.600   A         0.192451941093  0.6673480    ; Iron2 from charmm
-FE3P    26      55.854000        2.400   A         0.100903188817  0.5238368    ; Iron3 from charmm
 FC	9   	18.998400	-0.128	 A  	   2.95000e-01     2.21750e-01  ; F-TFSI
 CF	6   	12.011000  	+0.280	 A	   3.50000e-01     2.76144e-01  ; C-TFSI
 SO	16  	32.060000   	+0.816	 A	   3.55000e-01     10.4600e-01  ; S-TFSI

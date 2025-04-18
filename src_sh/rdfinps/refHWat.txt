@@ -1,0 +1,1 @@
+resname SOL and type HW

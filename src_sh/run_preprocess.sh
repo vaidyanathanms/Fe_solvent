@@ -24,7 +24,7 @@ mkdir -p initdir
 mkdir -p outdir
 
 # editconf box
-srun gmx editconf -f FeTFSI.pdb -bt cubic -d 0.5 -o main.pdb
+srun gmx editconf -f FeTFSI.pdb -bt cubic -box 6.40 6.40 6.40 -o main.pdb
 wait
 
 # make tpr file
