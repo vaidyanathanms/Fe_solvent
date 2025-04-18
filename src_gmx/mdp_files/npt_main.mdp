@@ -28,7 +28,7 @@ ewald_rtol              = 1e-5      ; error tolerance for FFT
 optimize_fft            = yes       ; from Micholas's script
 ; Temperature coupling is on
 Tcoupl                  = V-rescale ; modified Berendsen thermostat
-tc-grps                 = FE T2N SOL_   ; multiple coupling groups
+tc-grps                 = FE T2N SOL   ; multiple coupling groups
 tau_t                   = 0.2 0.2 0.2   ; time constant, in ps
 ref_t                   = 300 300 300   ; reference temperature, one for each group, in K
 ; Pressure coupling is on

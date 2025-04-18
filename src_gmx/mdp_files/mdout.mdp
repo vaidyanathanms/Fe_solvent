@@ -1,36 +1,39 @@
 ;
 ;	File 'mdout.mdp' was generated
 ;	By user: unknown (26325)
-;	On host: or-condo-c18.ornl.gov
-;	At date: Tue Jan 21 19:59:42 2025
-
+;	On host: or-condo-c134.ornl.gov
+;	At date: Thu Apr  3 00:40:39 2025
 ;
 ;	Created by:
-;	                     :-) GROMACS - gmx grompp, 2016.3 (-:
+;	                  :-) GROMACS - gmx grompp, 2024.1-spack (-:
 ;	
-;	Executable:   /software/dev_tools/swtree/cs400_centos7.2_pe2016-08/gromacs/2016.3/centos7.2_intel16.0.1/bin/gmx
-;	Data prefix:  /software/dev_tools/swtree/cs400_centos7.2_pe2016-08/gromacs/2016.3/centos7.2_intel16.0.1
-;	Working dir:  /home/vm5/all_codes/files_fecl/src_gmx/mdp_files
+;	Executable:   /sw/cades-open/spack-envs/opt/base-2025.01/oneapi-2025.0.1/gromacs-2024.1-vifbgpz4v5pincux4ukwdta6rj3x4gwl/bin/gmx_mpi
+;	Data prefix:  /sw/cades-open/spack-envs/opt/base-2025.01/oneapi-2025.0.1/gromacs-2024.1-vifbgpz4v5pincux4ukwdta6rj3x4gwl
+;	Working dir:  /lustre/or-scratch/cades-birthright/vm5/fetfsi/fetfsi_3/trial_4/mol_0.1
 ;	Command line:
-;	  gmx grompp -f minim.mdp -p ../top_files/topol.top -c ../gropbd_files/fe_tfsi.pdb -o enermin.tpr
+;	  gmx_mpi grompp -f npt_berendsen.mdp -c confout_nvt.gro -p topol.top -o npt_berendsen.tpr -maxwarn 1
 
 ; VARIOUS PREPROCESSING OPTIONS
 ; Preprocessor information: use cpp syntax.
 ; e.g.: -I/home/joe/doe -I/home/mary/roe
 include                  = 
 ; e.g.: -DPOSRES -DFLEXIBLE (note these variable names are case sensitive)
-define                   = -DFLEXIBLE
+define                   = 
 
 ; RUN CONTROL PARAMETERS
-integrator               = steep
+integrator               = md
 ; Start time and timestep in ps
 tinit                    = 0
 dt                       = 0.001
-nsteps                   = 100000
+nsteps                   = 20000000
 ; For exact run continuation or redoing part of a run
 init-step                = 0
 ; Part index is updated automatically on checkpointing (keeps files separate)
 simulation-part          = 1
+; Multiple time-stepping
+mts                      = no
+; factor by which to increase the mass of the lightest atoms
+mass-repartition-factor  = 1
 ; mode for center of mass motion removal
 comm-mode                = Linear
 ; number of steps for center of mass motion removal
@@ -45,7 +48,7 @@ ld-seed                  = -1
 
 ; ENERGY MINIMIZATION OPTIONS
 ; Force tolerance and initial step-size
-emtol                    = 5.0
+emtol                    = 10
 emstep                   = 0.01
 ; Max number of iterations in relax-shells
 niter                    = 20
@@ -60,13 +63,13 @@ rtpi                     = 0.05
 
 ; OUTPUT CONTROL OPTIONS
 ; Output frequency for coords (x), velocities (v) and forces (f)
-nstxout                  = 0
+nstxout                  = 5000
 nstvout                  = 0
 nstfout                  = 0
 ; Output frequency for energies to log file and energy file
-nstlog                   = 1000
+nstlog                   = 5000
 nstcalcenergy            = 100
-nstenergy                = 1000
+nstenergy                = 5000
 ; Output frequency and precision for .xtc file
 nstxout-compressed       = 0
 compressed-x-precision   = 1000
@@ -78,18 +81,18 @@ compressed-x-grps        =
 energygrps               = 
 
 ; NEIGHBORSEARCHING PARAMETERS
-; cut-off scheme (Verlet: particle based cut-offs, group: using charge groups)
+; cut-off scheme (Verlet: particle based cut-offs)
 cutoff-scheme            = Verlet
 ; nblist update frequency
 nstlist                  = 10
-; ns algorithm (simple or grid)
-ns_type                  = grid
 ; Periodic boundary conditions: xyz, no, xy
 pbc                      = xyz
 periodic-molecules       = no
-; Allowed energy error due to the Verlet buffer in kJ/mol/ps per atom,
+; Allowed energy drift due to the Verlet buffer in kJ/mol/ps per atom,
 ; a value of -1 means: use rlist
 verlet-buffer-tolerance  = 0.005
+; Allowed error in the average pressure due to the Verlet buffer for LJ interactions
+verlet-buffer-pressure-tolerance = 0.5
 ; nblist cut-off        
 rlist                    = 1
 ; long-range cut-off for switched potentials
@@ -110,7 +113,7 @@ vdw-modifier             = Potential-shift-Verlet
 rvdw-switch              = 0
 rvdw                     = 1.0
 ; Apply long range dispersion corrections for Energy and Pressure
-DispCorr                 = No
+DispCorr                 = EnerPres
 ; Extension of the potential lookup tables beyond the cut-off
 table-extension          = 1
 ; Separate tables between energy group pairs
@@ -122,87 +125,42 @@ fourier-nx               = 0
 fourier-ny               = 0
 fourier-nz               = 0
 ; EWALD/PME/PPPM parameters
-pme-order                = 4
-ewald-rtol               = 1e-05
+pme_order                = 4
+ewald_rtol               = 1e-5
 ewald-rtol-lj            = 0.001
 lj-pme-comb-rule         = Geometric
 ewald-geometry           = 3d
 epsilon-surface          = 0
-
-; IMPLICIT SOLVENT ALGORITHM
-implicit-solvent         = No
-
-; GENERALIZED BORN ELECTROSTATICS
-; Algorithm for calculating Born radii
-gb-algorithm             = Still
-; Frequency of calculating the Born radii inside rlist
-nstgbradii               = 1
-; Cutoff for Born radii calculation; the contribution from atoms
-; between rlist and rgbradii is updated every nstlist steps
-rgbradii                 = 1
-; Dielectric coefficient of the implicit solvent
-gb-epsilon-solvent       = 80
-; Salt concentration in M for Generalized Born models
-gb-saltconc              = 0
-; Scaling factors used in the OBC GB model. Default values are OBC(II)
-gb-obc-alpha             = 1
-gb-obc-beta              = 0.8
-gb-obc-gamma             = 4.85
-gb-dielectric-offset     = 0.009
-sa-algorithm             = Ace-approximation
-; Surface tension (kJ/mol/nm^2) for the SA (nonpolar surface) part of GBSA
-; The value -1 will set default value for Still/HCT/OBC GB-models.
-sa-surface-tension       = -1
+implicit-solvent         = no
 
 ; OPTIONS FOR WEAK COUPLING ALGORITHMS
+ensemble-temperature-setting = auto
+ensemble-temperature     = -1
 ; Temperature coupling  
-tcoupl                   = No
+Tcoupl                   = V-rescale
 nsttcouple               = -1
 nh-chain-length          = 10
 print-nose-hoover-chain-variables = no
 ; Groups to couple separately
-tc-grps                  = 
+tc-grps                  = FE T2N SOL
 ; Time constant (ps) and reference temperature (K)
-tau-t                    = 
-ref-t                    = 
+tau_t                    = 0.1 0.1 0.1
+ref_t                    = 300 300 300
 ; pressure coupling     
-pcoupl                   = No
+Pcoupl                   = Berendsen
 pcoupltype               = Isotropic
 nstpcouple               = -1
 ; Time constant (ps), compressibility (1/bar) and reference P (bar)
-tau-p                    = 1
-compressibility          = 
-ref-p                    = 
+tau_p                    = 0.5
+compressibility          = 4.5e-5
+ref_p                    = 1.0
 ; Scaling of reference coordinates, No, All or COM
-refcoord-scaling         = No
+refcoord-scaling         = com
 
 ; OPTIONS FOR QMMM calculations
 QMMM                     = no
-; Groups treated Quantum Mechanically
+; Groups treated with MiMiC
 QMMM-grps                = 
-; QM method             
-QMmethod                 = 
-; QMMM scheme           
-QMMMscheme               = normal
-; QM basisset           
-QMbasis                  = 
-; QM charge             
-QMcharge                 = 
-; QM multiplicity       
-QMmult                   = 
-; Surface Hopping       
-SH                       = 
-; CAS space options     
-CASorbitals              = 
-CASelectrons             = 
-SAon                     = 
-SAoff                    = 
-SAsteps                  = 
-; Scale factor for MM charges
-MMChargeScaleFactor      = 1
-; Optimization of QM subsystem
-bOPT                     = 
-bTS                      = 
 
 ; SIMULATED ANNEALING  
 ; Type of annealing for each temperature group (no/single/periodic)
@@ -217,24 +175,24 @@ annealing-temp           =
 ; GENERATE VELOCITIES FOR STARTUP RUN
 gen-vel                  = no
 gen-temp                 = 300
-gen-seed                 = -1
+gen-seed                 = -1770086401
 
 ; OPTIONS FOR BONDS    
-constraints              = none
+constraints              = h-bonds
 ; Type of constraint algorithm
-constraint-algorithm     = Lincs
+constraint_algorithm     = lincs
 ; Do not constrain the start configuration
-continuation             = no
+continuation             = yes
 ; Use successive overrelaxation to reduce the number of shake iterations
 Shake-SOR                = no
 ; Relative tolerance of shake
 shake-tol                = 0.0001
 ; Highest order in the expansion of the constraint coupling matrix
-lincs-order              = 4
+lincs_order              = 4
 ; Number of iterations in the final step of LINCS. 1 is fine for
 ; normal simulations, but use 2 to conserve energy in NVE runs.
 ; For energy minimization with constraints it should be 4 to 8.
-lincs-iter               = 1
+lincs_iter               = 1
 ; Lincs will write a warning to the stderr if in one step a bond
 ; rotates over more degrees than
 lincs-warnangle          = 30
@@ -256,6 +214,9 @@ wall-ewald-zfac          = 3
 
 ; COM PULLING          
 pull                     = no
+
+; AWH biasing          
+awh                      = no
 
 ; ENFORCED ROTATION    
 ; Enforced rotation: No or Yes
@@ -304,11 +265,15 @@ temperature-lambdas      =
 calc-lambda-neighbors    = 1
 init-lambda-weights      = 
 dhdl-print-energy        = no
+sc-function              = beutler
 sc-alpha                 = 0
 sc-power                 = 1
 sc-r-power               = 6
 sc-sigma                 = 0.3
 sc-coul                  = no
+sc-gapsys-scale-linpoint-lj = 0.85
+sc-gapsys-scale-linpoint-q = 0.3
+sc-gapsys-sigma-lj       = 0.3
 separate-dhdl-file       = yes
 dhdl-derivatives         = yes
 dh_hist_size             = 0
@@ -321,25 +286,13 @@ freezegrps               =
 freezedim                = 
 cos-acceleration         = 0
 deform                   = 
+deform-init-flow         = no
 
 ; simulated tempering variables
 simulated-tempering      = no
 simulated-tempering-scaling = geometric
 sim-temp-low             = 300
 sim-temp-high            = 300
-
-; Electric fields      
-; Format is number of terms (int) and for all terms an amplitude (real)
-; and a phase angle (real)
-E-x                      = 
-; Time dependent (pulsed) electric field. Format is omega, time for pulse
-; peak, and sigma (width) for pulse. Sigma = 0 removes pulse, leaving
-; the field to be a cosine function.
-E-xt                     = 
-E-y                      = 
-E-yt                     = 
-E-z                      = 
-E-zt                     = 
 
 ; Ion/water position swapping for computational electrophysiology setups
 ; Swap positions along direction: no, X, Y, Z
@@ -357,3 +310,20 @@ userreal1                = 0
 userreal2                = 0
 userreal3                = 0
 userreal4                = 0
+; Electric fields
+; Format for electric-field-x, etc. is: four real variables:
+; amplitude (V/nm), frequency omega (1/ps), time for the pulse peak (ps),
+; and sigma (ps) width of the pulse. Omega = 0 means static field,
+; sigma = 0 means no pulse, leaving the field to be a cosine function.
+electric-field-x         = 0 0 0 0
+electric-field-y         = 0 0 0 0
+electric-field-z         = 0 0 0 0
+
+; Density guided simulation
+density-guided-simulation-active = false
+
+; QM/MM with CP2K
+qmmm-cp2k-active         = false
+
+; Colvars bias
+colvars-active           = false

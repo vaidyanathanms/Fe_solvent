@@ -1,7 +1,7 @@
 title                   = NVT_Equilibration ; Title 
 ; Run parameters
 integrator              = md        ; leap-frog integrator
-nsteps                  = 2000000   ; 1 * 2000000 fs = 2 ns
+nsteps                  = 10000000   ; 1 * 2000000 fs = 10 ns
 dt                      = 0.001     ; 1 fs
 ; Output control
 nstxout                 = 5000       ; save coordinates every 10.0 ps
