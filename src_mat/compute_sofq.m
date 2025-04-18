@@ -7,7 +7,7 @@ close all;
 
 
 %% Input data
-fe_charge    = 2; %or 3
+fe_charge    = 3; %or 3
 lorch_window = 1; % 0 - No Lorch Window; 1 - Lorch Window; 2 - Lorch Window Amalie
 norm_den     = 'add'; % 'denom','add','none'
 molality     = cellstr({"0.1","0.2","0.4","1.0"}); % String type
@@ -180,7 +180,7 @@ for molcnt = 1:length(molality(:)) %
 
   %% Analyze water-water
   inpids = [7;8];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_WW_%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
+  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_WW_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
   normvalWW = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
   sofq_WW   = compute_partial_sofq(length(qvec),inpids,Sofq);
   outw = write_partial_sofq(qvec,sofq_WW,fpid,inpids,type_str);
@@ -188,15 +188,15 @@ for molcnt = 1:length(molality(:)) %
 
   %% Analyze water-TFSI
   inpids = [2;3;4;5;6;7;8];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_WA_%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
+  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_WA_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
   normvalWA = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
   sofq_WA   = compute_partial_sofq(length(qvec),inpids,Sofq);
   outw = write_partial_sofq(qvec,sofq_WA,fpid,inpids,type_str);
-  fclose(fpid)
+  fclose(fpid);
 
   %% Analyze Water-Fe
   inpids = [1;7;8];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_WF_%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
+  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_WF_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
   normvalWF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
   sofq_WF   = compute_partial_sofq(length(qvec),inpids,Sofq);
   outw = write_partial_sofq(qvec,sofq_WF,fpid,inpids,type_str);
@@ -204,7 +204,7 @@ for molcnt = 1:length(molality(:)) %
 
   %% Analyze TFSI-TFSI
   inpids = [2;3;4;5;6];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_AA_%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
+  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_AA_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
   normvalAA = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
   sofq_AA   = compute_partial_sofq(length(qvec),inpids,Sofq);
   outw = write_partial_sofq(qvec,sofq_AA,fpid,inpids,type_str);
@@ -212,7 +212,7 @@ for molcnt = 1:length(molality(:)) %
 
   %% Analyze TFSI-Fe
   inpids = [1;2;3;4;5;6];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_AF_%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
+  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_AF_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
   normvalAF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
   sofq_AF   = compute_partial_sofq(length(qvec),inpids,Sofq);
   outw = write_partial_sofq(qvec,sofq_AF,fpid,inpids,type_str);
@@ -220,7 +220,7 @@ for molcnt = 1:length(molality(:)) %
 
   %% Analyze Fe-Fe
   inpids = [1];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_FF_%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
+  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_FF_%d_mol_Fe%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
   normvalFF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
   sofq_FF   = compute_partial_sofq(length(qvec),inpids,Sofq);
   outw = write_partial_sofq(qvec,sofq_FF,fpid,inpids,type_str);
@@ -228,34 +228,31 @@ for molcnt = 1:length(molality(:)) %
 
   %% Plot partial structure factors
   h = figure;
-  hold on
+  hold on;
   box on
-  grid on
+  grid on;
   leg_arr = {};
-  plot(qvec,sofq_WW,'color',clr_arr{1},'LineWidth',2)
+  plot(qvec,sofq_WW,'color',clr_arr{1},'LineWidth',2);
   leg_arr{1} = 'Water-Water';
-  plot(qvec,sofq_WA,'color',clr_arr{2},'LineWidth',2)
+  plot(qvec,sofq_WA,'color',clr_arr{2},'LineWidth',2);
   leg_arr{2} = 'Water-TFSI';
-  plot(qvec,sofq_WF,'color',clr_arr{3},'LineWidth',2)
+  plot(qvec,sofq_WF,'color',clr_arr{3},'LineWidth',2);
   leg_arr{3} = 'Water-Fe';
-  plot(qvec,sofq_AA,'color',clr_arr{4},'LineWidth',2)
+  plot(qvec,sofq_AA,'color',clr_arr{4},'LineWidth',2);
   leg_arr{4} = 'TFSI-TFSI';
-  plot(qvec,sofq_AF,'color',clr_arr{5},'LineWidth',2)
+  plot(qvec,sofq_AF,'color',clr_arr{5},'LineWidth',2);
   leg_arr{5} = 'TFSI-Fe';
-  plot(qvec,sofq_FF,'color',clr_arr{6},'LineWidth',2)
+  plot(qvec,sofq_FF,'color',clr_arr{6},'LineWidth',2);
   leg_arr{6} = 'Fe-Fe';
   xlim([0.9*qmin 1.1*qmax])
-  %ylim([0.9*min(min(tot_sofq)) 1.1*max(max(tot_sofq))])
   xlabel('q','FontSize',20)
   ylabel('I(q)','FontSize',20)
   set(gca, 'FontSize', 12)
   set(gca, 'xscale', 'log')
-  %set(gca, 'yscale', 'log')
   set(gca, 'xtick', 0.1:0.3:1);
   set(gca,'XtickLabel', [0.1 0.4 0.7 1.0])
   legend(leg_arr,'location','bestoutside')
-  saveas(h,sprintf('./../../FeTFSI/figures/partialsq_%d_mol_%s_%d_lorwind_%d',fe_charge,char(molality{molcnt}),fe_charge,lorch_window),'png')
-  %close(h)
+  saveas(h,sprintf('./../../FeTFSI/figures/partialsq_mol_%s_Fe_%d_norm_%s.png',char(molality{molcnt}),fe_charge,norm_den))
 
 end
 
@@ -266,6 +263,7 @@ h = figure;
 hold on
 box on
 grid on
+leg_arr={};
 for i = 1:length(molality(:))
   plot(qvec,tot_sofq(:,i),'color',clr_arr{i},'LineWidth',2)
   leg_arr{i} = molality{i};
