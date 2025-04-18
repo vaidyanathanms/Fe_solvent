@@ -1,0 +1,8 @@
+resname FE;
+resname T2N and type NS;
+resname T2N and type OS;
+resname T2N and type FC;
+resname T2N and type CF;
+resname T2N and type SO;
+resname SOL and type OW;
+resname SOL and type HW
