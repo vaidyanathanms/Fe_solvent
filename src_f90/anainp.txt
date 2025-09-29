@@ -1,5 +1,5 @@
 datafile
-confout_all_ps.gro
+confout_all_0ps.gro
 trajectory_file
 traj_npt_main_nojump.gro
 nframes
@@ -37,9 +37,9 @@ F 8
 ion_type
 1
 cion_type
-8
+6
 compute_rdf
-10 100 8 6
+10 100 2.0 6
 1 1
 1 2
 1 4
@@ -47,12 +47,12 @@ compute_rdf
 2 6
 2 8
 compute_clust
-2.3 1
+0.8 1
 compute_catanneigh
-1 15 2.3
+1 15 0.8
 compute_iondiff
 1 5
 compute_ciondiff
 1 5
 compute_catanrestime
-2.3
+0.8
