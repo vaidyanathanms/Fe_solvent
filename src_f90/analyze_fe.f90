@@ -2,7 +2,16 @@ PROGRAM ANALYZE_GMXTRAJ
 
   USE PARAMS_GMX
   IMPLICIT NONE
-
+  
+  ! Print headers
+  PRINT *, "Analysis of Fe-salt systems .."
+  PRINT *, "Starting OMP Threads .."
+  
+!$OMP PARALLEL
+  nproc = OMP_GET_NUM_THREADS()
+!$OMP END PARALLEL
+  PRINT *, "Number of threads: ", nproc
+  
   CALL DEFAULTVALUES()
   CALL READ_ANA_INP_FILE()
   CALL READ_DATAFILE()
@@ -647,7 +656,7 @@ SUBROUTINE ANALYZE_TRAJECTORYFILE()
         PRINT *, "Starting time: ", act_time
         WRITE(logout,*) "Starting time: ", act_time
      END IF
-     
+
      nfrcntr = nfrcntr + 1     
      tarr_lmp(nfrcntr) = act_time
      IF(mod(act_time,100.0) == 0.0) PRINT *,"Time (ps): ",act_time
