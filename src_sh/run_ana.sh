@@ -10,7 +10,7 @@
 #SBATCH --ntasks-per-node=1     # 1 tasks/node
 #SBATCH -c 8                    # 8 cores/task
 #SBATCH --mem=0
-#SBATCH -J gengro_Fe3_m_0.1
+#SBATCH -J ana_Fe3_m_0.1
 #SBATCH -o ana_mol_0.1/out.%J
 #SBATCH -e ana_mol_0.1/err.%J
 
