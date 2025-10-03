@@ -646,20 +646,20 @@ SUBROUTINE ANALYZE_TRAJECTORYFILE()
            READ(trajread,*)
         END DO
         CYCLE
-
+        
      END IF
-
-     
-     IF(nfrcntr .GT. nframes) EXIT
      
      IF(nfrcntr == 0) THEN
         PRINT *, "Starting time: ", act_time
         WRITE(logout,*) "Starting time: ", act_time
      END IF
 
-     nfrcntr = nfrcntr + 1     
+     nfrcntr = nfrcntr + 1
+     IF(nfrcntr .GT. nframes) EXIT
      tarr_lmp(nfrcntr) = act_time
-     IF(mod(act_time,100.0) == 0.0) PRINT *,"Time (ps): ",act_time
+
+     IF(mod(nfrcntr,100) == 0) PRINT *, "Analyzed ", nfrcntr, " frames&
+          &; Current time (ps): ", act_time
      
      DO at_cnt = 1,atchk
         
@@ -730,10 +730,10 @@ SUBROUTINE ANALYZE_TRAJECTORYFILE()
   CLOSE(trajread)
 
   PRINT *, "Trajectory read completed .."
-  PRINT *, "Last frame analyzed ..", act_time
-  PRINT *, "Total frames analyzed ..", nfrcntr
-  WRITE(logout,*) "Total frames analyzed ..", nfrcntr
-  WRITE(logout,*) "Last frame analyzed ..", act_time
+  PRINT *, "Last frame analyzed ..", tarr_lmp(nfrcntr-1)
+  PRINT *, "Total frames analyzed ..", nfrcntr-1
+  WRITE(logout,*) "Total frames analyzed ..", nfrcntr-1
+  WRITE(logout,*) "Last frame analyzed ..", tarr_lmp(nfrcntr-1)
     
   PRINT *, "Beginning dynamical analysis..."
   CALL DYNAMICS_MAIN()
@@ -1365,7 +1365,7 @@ SUBROUTINE CAT_AN_NEIGHS()
         rzval = rzval - box_zl*ANINT(rzval/box_zl)
 
         rval = sqrt(rxval**2 + ryval**2 + rzval**2)
-
+        
         IF(rval .LT. rneigh_cut) THEN
 
            neigh_cnt = neigh_cnt + 1
@@ -1456,16 +1456,27 @@ SUBROUTINE BINARY_CLUSTER_ANALYSIS(frnum)
   IMPLICIT NONE
 
 !Ref Sevick et.al ., J Chem Phys 88 (2)
-
+!!$  INTEGER, DIMENSION(ntotion_centers,ntotion_centers) :: all_direct,&
+!!$       & all_neigh
+!!$  INTEGER, ALLOCATABLE, DIMENSION(:,:) :: catan_direct
+  
   INTEGER :: i,j,k,a2ptr,a1id,a2id,itype,jtype,jptr,idum,jflag,jcnt&
        &,iflag,jtot,jind,jprev
-  INTEGER, DIMENSION(ntotion_centers,ntotion_centers) :: all_direct&
-       &,catan_direct,all_neigh
+  INTEGER, ALLOCATABLE, DIMENSION(:,:) :: all_direct,all_neigh
   INTEGER, DIMENSION(1:ntotion_centers) :: union_all,scnt,all_linked
   REAL :: rxval, ryval, rzval, rval
   INTEGER, INTENT(IN) :: frnum
+  INTEGER :: AllocateStatus
 
-!$OMP PARALLEL SHARED(catan_direct)
+  ALLOCATE(all_direct(ntotion_centers,ntotion_centers),stat =&
+       & AllocateStatus)
+  IF(AllocateStatus/=0) STOP "did not allocate all_direct"
+
+  ALLOCATE(all_neigh(ntotion_centers,ntotion_centers),stat =&
+       & AllocateStatus)
+  IF(AllocateStatus/=0) STOP "did not allocate all_neigh"
+
+!$OMP PARALLEL 
 
 !$OMP DO PRIVATE(i,j)
   DO i = 1,ntotion_centers
@@ -1477,12 +1488,12 @@ SUBROUTINE BINARY_CLUSTER_ANALYSIS(frnum)
 
         IF(i .NE. j) THEN
            all_direct(i,j) = 0
-           catan_direct(i,j) = 0
+!!$           catan_direct(i,j) = 0
         END IF
 
         IF(i == j) THEN
            all_direct(i,j) = 1
-           catan_direct(i,j) = 0
+!!$           catan_direct(i,j) = 0
         END IF
 
         all_neigh(i,j) = 0
@@ -1529,15 +1540,15 @@ SUBROUTINE BINARY_CLUSTER_ANALYSIS(frnum)
 
            jtype = aidvals(a2id,3)
 
-           IF(itype .NE. jtype) THEN
+!           IF(itype .NE. jtype) THEN
 
-              catan_direct(i,j) = 1
+!              catan_direct(i,j) = 1
 !              catan_neigh(i,j)  = a2id
 !              catan_neigh(i,jptr+1) = a2id
-              itype = jtype
+!              itype = jtype
 !              jptr  = jptr + 1
 
-           END IF
+!           END IF
 
         END IF
 
@@ -1734,6 +1745,9 @@ SUBROUTINE BINARY_CLUSTER_ANALYSIS(frnum)
 
   END IF
 
+  DEALLOCATE(all_direct)
+  DEALLOCATE(all_neigh)
+  
 END SUBROUTINE BINARY_CLUSTER_ANALYSIS
 
 !--------------------------------------------------------------------
@@ -2113,7 +2127,7 @@ SUBROUTINE DIFF_IONS()
 
   DO i = 0, nframes-1
 
-     WRITE(dumwrite,"(I10,1X,3(F14.5,1X))") tarr_lmp(i+1), gxarr(i)&
+     WRITE(dumwrite,"(4(F14.5,1X))") tarr_lmp(i+1), gxarr(i)&
           &,gyarr(i), gzarr(i)
 
   END DO
@@ -2188,7 +2202,7 @@ SUBROUTINE DIFF_COUNTERIONS()
 
   DO i = 0, nframes-1
 
-     WRITE(dumwrite,"(I10,1X,3(F14.5,1X))") tarr_lmp(i+1), gxarr(i)&
+     WRITE(dumwrite,"(4(F14.5,1X))") tarr_lmp(i+1), gxarr(i)&
           &,gyarr(i),gzarr(i)
 
   END DO

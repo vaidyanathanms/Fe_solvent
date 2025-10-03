@@ -38,8 +38,11 @@ ion_type
 1
 cion_type
 6
+com_types
+5
+4 5 6 7 8
 compute_rdf
-10 100 2.0 6
+10 500 2.0 6
 1 1
 1 2
 1 4
@@ -49,10 +52,12 @@ compute_rdf
 compute_clust
 0.8 1
 compute_catanneigh
-1 15 0.8
+1 60 0.8
 compute_iondiff
 1 5
 compute_ciondiff
 1 5
 compute_catanrestime
 0.8
+compute_comdiff
+1 10
