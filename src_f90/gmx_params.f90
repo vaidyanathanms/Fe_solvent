@@ -6,25 +6,30 @@ MODULE PARAMS_GMX
   IMPLICIT NONE
 
   ! Atom, processor and time details
-  INTEGER :: ntotatoms, ntotatomtypes
+  INTEGER :: ntotatoms, ntotatomtypes, ntotmols
   INTEGER :: nframes, freqfr, nfrcntr, skipfr
   REAL    :: start_time
   INTEGER :: nproc
   INTEGER :: ioncnt,  iontype
   INTEGER :: c_ioncnt, c_iontype
-  INTEGER :: p_ioncnt, p_iontype, npoly_types
+  INTEGER :: nmol_totcom, ncom_types
   INTEGER :: nclust_types
+  INTEGER, PARAMETER :: com_type = 199 ! Set here
   
   ! Structural quantities
   INTEGER :: rdffreq,rmaxbin,npairs,rdfpaircnt
   INTEGER :: maxneighsize, neighfreq
   INTEGER :: ntotion_centers,totmult_centers
   INTEGER :: maxsize_species
-  REAL    :: rneigh_cut,rcatan_cut,rclust_cut,rcatpol_cut
+  INTEGER :: neighfreq_COM,maxneighsize_COM
+  REAL    :: rneigh_cut,rcatan_cut,rclust_cut,rcatCOM_cut
   REAL    :: rvolavg,rdomcut,rbinval,rvolval
-
+  REAL    :: rCOMneigh_cut
+  
   ! Dynamic quantities
-  REAL    :: delta_t
+  REAL    :: delta_t,q_targ,q_tol,q_targ_max,q_targ_min
+  REAL    :: q_bin,  qval, q_hi, q_lo, q_hi2, q_lo2
+  INTEGER :: q_nmax, q_possN
   
   ! All flags
   INTEGER :: box_from_file_flag, box_type_flag
@@ -32,12 +37,13 @@ MODULE PARAMS_GMX
   INTEGER :: rdfcalc_flag
   INTEGER :: catan_neighcalc_flag
   INTEGER :: clust_calc_flag, clust_time_flag
-  INTEGER :: polyflag
-  INTEGER :: ion_dynflag, cion_dynflag, pion_dynflag
-  INTEGER :: ion_diff,cion_diff,pion_diff
-  INTEGER :: catan_autocfflag, catpol_autocfflag
+  INTEGER :: comflag,catCOM_neighcalc_flag
+  INTEGER :: ion_dynflag, cion_dynflag, com_dynflag
+  INTEGER :: ion_diff,cion_diff,com_diff
+  INTEGER :: catan_autocfflag, catCOM_autocfflag
   INTEGER :: name_to_type_map_flag
   INTEGER :: multclust_calc_flag
+  INTEGER :: dynfsktflag
   
   ! File names and unit numbers
   CHARACTER(LEN = 256) :: ana_fname, dum_fname
@@ -63,11 +69,12 @@ MODULE PARAMS_GMX
   CHARACTER(max_char),ALLOCATABLE :: name_arr(:) 
   REAL,ALLOCATABLE,DIMENSION(:) :: boxx_arr,boxy_arr,boxz_arr
   REAL,ALLOCATABLE,DIMENSION(:,:) :: masses
-  REAL*8,ALLOCATABLE,DIMENSION(:,:) :: rxyz_lmp
-  INTEGER,ALLOCATABLE,DIMENSION(:) :: type_arr,polytyp_arr
+  REAL*8,ALLOCATABLE,DIMENSION(:) :: com_masses
+  REAL*8,ALLOCATABLE,DIMENSION(:,:) :: rxyz_gmx,comxyz_gmx
+  INTEGER,ALLOCATABLE,DIMENSION(:) :: type_arr,comtyp_arr
   INTEGER,ALLOCATABLE,DIMENSION(:,:):: aidvals
-  INTEGER,ALLOCATABLE,DIMENSION(:,:) :: ionarray,counterarray
-  INTEGER,ALLOCATABLE,DIMENSION(:,:) :: polyionarray
+  INTEGER,ALLOCATABLE,DIMENSION(:,:) :: ion_IDTYP_arr&
+       &,countion_IDTYP_arr, com_IDTYP_arr
   INTEGER,ALLOCATABLE,DIMENSION(:,:) :: allionids,multionids
 
   !Required arrays - Statics Quantities
@@ -79,10 +86,11 @@ MODULE PARAMS_GMX
   REAL*8,ALLOCATABLE,DIMENSION(:) :: cat_an_neighavg,an_cat_neighavg
 
   !Required Arrays - Dynamic Quantities
-  REAL*8, ALLOCATABLE, DIMENSION(:)   :: tarr_lmp
-  REAL*8, ALLOCATABLE, DIMENSION(:,:) :: trx_lmp,try_lmp,trz_lmp
-  REAL*8, ALLOCATABLE, DIMENSION(:,:) :: itrx_lmp,itry_lmp,itrz_lmp
-  REAL*8, ALLOCATABLE, DIMENSION(:,:) :: ctrx_lmp,ctry_lmp,ctrz_lmp
-  REAL*8, ALLOCATABLE, DIMENSION(:,:) :: ptrx_lmp,ptry_lmp,ptrz_lmp
+  INTEGER*8, ALLOCATABLE, DIMENSION(:,:) :: q_nlist
+  REAL*8, ALLOCATABLE, DIMENSION(:)   :: tarr_gmx
+  REAL*8, ALLOCATABLE, DIMENSION(:,:) :: trx_gmx,try_gmx,trz_gmx
+  REAL*8, ALLOCATABLE, DIMENSION(:,:) :: itrx_gmx,itry_gmx,itrz_gmx
+  REAL*8, ALLOCATABLE, DIMENSION(:,:) :: ctrx_gmx,ctry_gmx,ctrz_gmx
+  REAL*8, ALLOCATABLE, DIMENSION(:,:) :: comtx_gmx,comty_gmx,comtz_gmx
 
 END MODULE PARAMS_GMX
