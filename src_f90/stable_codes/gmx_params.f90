@@ -25,7 +25,6 @@ MODULE PARAMS_GMX
 
   ! Dynamic quantities
   REAL    :: delta_t
-  REAL    :: q_targ, q_tol, q_nmax, q_lo,q_hi,q_lo2,q_hi2
   
   ! All flags
   INTEGER :: box_from_file_flag, box_type_flag
@@ -37,7 +36,6 @@ MODULE PARAMS_GMX
   INTEGER :: ion_dynflag, cion_dynflag, pion_dynflag
   INTEGER :: ion_diff,cion_diff,pion_diff
   INTEGER :: catan_autocfflag, catpol_autocfflag
-  INTEGER :: dynfsktflag
   INTEGER :: name_to_type_map_flag
   INTEGER :: multclust_calc_flag
   
@@ -86,6 +84,5 @@ MODULE PARAMS_GMX
   REAL*8, ALLOCATABLE, DIMENSION(:,:) :: itrx_lmp,itry_lmp,itrz_lmp
   REAL*8, ALLOCATABLE, DIMENSION(:,:) :: ctrx_lmp,ctry_lmp,ctrz_lmp
   REAL*8, ALLOCATABLE, DIMENSION(:,:) :: ptrx_lmp,ptry_lmp,ptrz_lmp
-  INTEGER*8, ALLOCATABLE, DIMENSION(:,:) :: q_nlist
-  
+
 END MODULE PARAMS_GMX
