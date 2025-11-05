@@ -1,3 +1,16 @@
+! Main program for analyzing GROMACS trajectories
+
+!####################################################################
+! Version 1.0: June-05-2025
+! Author: Vaidyanathan Sethuraman
+! Email: vm5@ornl.gov
+!####################################################################
+
+!####################################################################
+! Analyzes GROMACS outputs in .gro format
+! Only static properties 
+! Auxiliary files: gmx_params.f90; anainp.txt
+!####################################################################
 PROGRAM ANALYZE_GMXTRAJ
 
   USE PARAMS_GMX
