@@ -1,5 +1,17 @@
 ! Parameters for GMX trajectories
 
+!####################################################################
+! Version 2.0: November-05-2025
+! Author: Vaidyanathan Sethuraman
+! Email: vm5@ornl.gov
+!####################################################################
+
+!####################################################################
+! Analyzes GROMACS outputs in .gro format
+! Can do analysis based on COM or on individual atoms
+! Auxiliary files: analyze_fe.f90; anainp.txt
+!####################################################################
+
 MODULE PARAMS_GMX
 
   USE OMP_LIB
