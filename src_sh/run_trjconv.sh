@@ -75,7 +75,7 @@ if [ ! -f "$fgronojumplong" ]; then
 	wait
 fi
 
-if [ ! -f "$ftrrnojumpshort" ]; then
+if [ ! -f "$fgronojumpshort" ]; then
 	# convert npt_main_smallrun.trr with no jump for the region of interest - here use the first frame and not the frame at 60 ps
 	echo "Convert to pbc nojump for the small_md"
 	echo "0" | srun ${gmx} trjconv -f traj_npt_smallrun.trr -s npt_smallrun.tpr -o traj_npt_smallrun_nojump.gro -pbc nojump
