@@ -5,7 +5,7 @@
 
 #SBATCH -A chem
 #SBATCH -p burst
-#SBATCH -t 06:00:00
+#SBATCH -t 14:00:00
 #SBATCH -N 1                    # 1 nodes
 #SBATCH --ntasks-per-node=1     # 1 tasks/node
 #SBATCH -c 8                    # 8 cores/task
@@ -31,24 +31,45 @@ outdir='ana_mol_0.1'
 mkdir -p ${outdir}
 wait
 
-./ana.o anainp.txt
+# Run everything for long trajs
+./ana.o anainp_long.txt
 wait
 
-cp anainp.txt ${outdir}
-mv iondiff_* ${outdir}/
-mv countiondiff_* ${outdir}/
-mv autocorrcion_* ${outdir}/
-mv autocorrpol_* ${outdir}/
-mv rdf_* ${outdir}/
+# Run ONLY dynamic sqt for short trajs
+./ana.o anainp_short.txt
+wait
+
+# analysis input and log output
+cp anainp.txt ${outdir}/
+mv log_* ${outdir}/
+
+# all types output
 mv ciontype_* ${outdir}/
 mv iontype_* ${outdir}/
+mv COMlist.txt ${outdir}
+
+# rdf outputs
+mv rdf_* ${outdir}/
+
+# cluster analysis outputs
 mv clusttime_* ${outdir}/
 mv scnt.txt ${outdir}/
 mv all_neigh.txt ${outdir}/
 mv clust_* ${outdir}/
+
+# coordination analysis outputs
 mv catanneigh_* ${outdir}/
-mv log_* ${outdir}/
-mv polyionlist* ${outdir}/
-mv polyclust_* ${outdir}/
+
+# diffusion files output
+mv iondiff_* ${outdir}/
+mv countiondiff_* ${outdir}/
+mv COMdiff_* ${outdir}/
+
+# residence time files output
+mv autocorrcion_* ${outdir}/
+mv autocorrion_* ${outdir}/
+
+# move Fskt files
+mv Fskt* ${outdir}
 
 echo "End of run.."
