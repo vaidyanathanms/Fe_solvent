@@ -92,7 +92,7 @@ def parse_args():
     # Iteration / time window
     p.add_argument('--stride', type=int, default=10, help='Process every Nth frame')
     p.add_argument('--tmin', type=float, default=90000, help='Start time (ps), inclusive')
-    p.add_argument('--tmax', type=float, default=99000, help='End time (ps), inclusive')
+    p.add_argument('--tmax', type=float, default=92000, help='End time (ps), inclusive')
     # geometry params
     p.add_argument('--tube-radius', type=float, default=1.8, help='Tube radius Å (size-aware default for Ow)')
     p.add_argument('--phi-max', type=float, default=30.0, help='Max cone half-angle in degrees')
