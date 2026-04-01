@@ -338,17 +338,18 @@ SUBROUTINE READ_DATAFILE()
   READ(inpread,'(A)') headline
   READ(inpread,*) ntotatoms
 
-  CALL GET_VALUE_REAL(trim(adjustl(headline)),'t',act_time,ok_t)
-  CALL GET_VALUE_INT(trim(adjustl(headline)),'step',timestep&
-       &,ok_step)
+! For data files there may or may not be any timestep
+!!$  CALL GET_VALUE_REAL(trim(adjustl(headline)),'t',act_time,ok_t)
+!!$  CALL GET_VALUE_INT(trim(adjustl(headline)),'step',timestep&
+!!$       &,ok_step)
 
-  IF(ok_t == .FALSE. .OR. ok_step == .FALSE.) THEN
-     
-     PRINT *, "Error in reading datafile .."
-     PRINT *, trim(adjustl(headline))
-     STOP
-     
-  END IF
+!!$  IF(ok_t == .FALSE. .OR. ok_step == .FALSE.) THEN
+!!$     
+!!$     PRINT *, "Error in reading datafile .."
+!!$     PRINT *, trim(adjustl(headline))
+!!$     STOP
+!!$     
+!!$  END IF
 
   PRINT *, "STATISTICS"
   PRINT *, "Number of atoms/atomtypes: " , ntotatoms,ntotatomtypes
@@ -530,7 +531,8 @@ SUBROUTINE ASSIGN_MASSES(aname,atype,aid,massval)
      
   ELSEIF(trim(adjustl(aname)) == 'FE' .OR. trim(adjustl(aname)) ==  '&
        &FE2P' .OR. trim(adjustl(aname)) == 'FE3P' .OR.&
-       & trim(adjustl(aname)) == 'FE2') THEN
+       & trim(adjustl(aname)) == 'FE2' .OR. trim(adjustl(aname)) == 'F&
+       &E3') THEN
      
      massval = 55.845
      
@@ -2639,7 +2641,7 @@ SUBROUTINE OUTPUT_MULTI_CLUSTERS()
   INTEGER :: i,ierr,k,stride
   INTEGER :: atom_index,index_remain
   
-  dum_fname = "multiclust_"//trim(adjustl(traj_fname))//".dat"
+  dum_fname = "multiclust_"//trim(adjustl(traj_fname))
 
   OPEN(unit = dumwrite,file =trim(dum_fname),action="write"&
        &,status="replace",iostat=ierr)
