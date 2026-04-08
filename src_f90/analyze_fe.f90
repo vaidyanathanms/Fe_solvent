@@ -362,8 +362,10 @@ SUBROUTINE READ_DATAFILE()
   DO j = 1,ntotatoms
         
      READ(inpread,'(i5,2a5,i5,3f8.3,3f8.4)') molid,molname,aname&
-          &,aid,rxyz_gmx(aid,1),rxyz_gmx(aid,2),rxyz_gmx(aid,3)
- 
+          &,aid,rx,ry,rz
+
+     IF (j .GT. 99999) aid = aid + 100000
+           
      CALL MAP_ANAME_TO_ATYPE(aname,atype,k,0)
      
      aidvals(j,1)     = j
@@ -912,6 +914,7 @@ SUBROUTINE ANALYZE_TRAJECTORYFILE()
   INTEGER :: aid,ierr,atchk,atype,jumpfr,jout
   INTEGER :: at_cnt,molid,kdummy
   REAL :: xlo,xhi,ylo,yhi,zlo,zhi
+  REAL :: rx, ry, rz
   CHARACTER(LEN=256):: headline
   LOGICAL :: ok_t, ok_step
   CHARACTER(LEN=max_char):: molname,aname
@@ -973,16 +976,22 @@ SUBROUTINE ANALYZE_TRAJECTORYFILE()
      DO at_cnt = 1,atchk
         
         READ(trajread,'(i5,2a5,i5,3f8.3,3f8.4)') molid,molname,aname&
-             &,aid,rxyz_gmx(aid,1),rxyz_gmx(aid,2),rxyz_gmx(aid,3)
+             &,aid, rx, ry, rz
 
-        CALL MAP_ANAME_TO_ATYPE(aname,atype,kdummy,act_time)
-        
-        IF(atype .NE. aidvals(aid,3)) THEN
+        IF (at_cnt .GT. 99999) aid = aid + 100000
            
+        rxyz_gmx(aid,1) = rx
+        rxyz_gmx(aid,2) = ry
+        rxyz_gmx(aid,3) = rz
+        
+        CALL MAP_ANAME_TO_ATYPE(aname,atype,kdummy,act_time)
+
+        IF(atype .NE. aidvals(aid,3)) THEN
+
            PRINT *, "Incorrect atom ids"
            PRINT *, timestep, act_time
-           PRINT *, at_cnt,trim(adjustl(aname)),atype,molid,aidvals(aid&
-                &,3)
+           PRINT *, at_cnt,trim(adjustl(aname)),atype,aid,molid&
+                &,aidvals(aid,3)
            STOP
            
         END IF
