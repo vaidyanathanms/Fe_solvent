@@ -1,3 +1,7 @@
+# Code to compute the CIP/SSIP and free ion-pairs
+# Change the default arguments in aux_ssip.py
+# A cone-angle definition is used for SSIP
+# Version: May-24-2026
 import argparse
 import math
 import csv
