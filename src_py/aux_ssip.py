@@ -1,6 +1,5 @@
-"""
-Auxiliary files for ssip.py
-"""
+# Auxiliary files for ssip_cone.py
+# Both files should be in the same directory
 import argparse, math, csv, sys
 import numpy as np
 import MDAnalysis as mda
@@ -69,6 +68,15 @@ def water_in_tfsi_cone(fe_pos,com_pos,ow_pos,r_tfsi,box,eps=1e-8):
     com_pos = np.asarray(com_pos, dtype=float).reshape(3,)
     ow_pos = np.asarray(ow_pos, dtype=float).reshape(3,)
 
+    """
+      r_fc   = vec(Fe -> AnionCOM); L = |r_fc|
+      alpha  = sin^(-1)(r_tfsi/L) - cone subtended angle
+      u_fc   = unit vector along r_fc
+      r_fw   = vec(Fe-OW); rw = |r_fw|
+      t      = projection of (Fe -> OW) along Fe -> AnionCOM
+      theta  = angle between (Fe -> OW) and (Fe -> AnionCOM), degrees
+    """
+
     r_fc = mic_vector(fe_pos, com_pos, box)
     L = np.linalg.norm(r_fc)
     if L < eps:
@@ -76,6 +84,7 @@ def water_in_tfsi_cone(fe_pos,com_pos,ow_pos,r_tfsi,box,eps=1e-8):
 
     ratio = min(max(r_tfsi / L, 0.0), 1.0)
     alpha = math.degrees(math.asin(ratio))
+
 
     u_fc = r_fc / L
     r_fw = mic_vector(fe_pos, ow_pos, box)
