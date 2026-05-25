@@ -1,3 +1,7 @@
+# A more complex geometry to compute SSIP/CIP and free-ions
+# DO NOT USE THIS unless necessary. Use ssip_cone.py for most cases
+# Make sure the assumptions here are right.
+# This has stringent requirements for a SSIP
 import argparse
 import math
 import csv
