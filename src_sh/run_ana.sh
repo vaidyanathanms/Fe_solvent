@@ -1,0 +1,75 @@
+#!/bin/bash
+# Optimized code from Subil/Omar -  OLCFHELP-22622 [cades-help] Unable to run Gromacs utilities (Check email: June-03-2025)
+# Instructions to build GROMACS are in this email
+# Date: July-02-2025
+
+#SBATCH -A chem
+#SBATCH -p burst
+#SBATCH -t 14:00:00
+#SBATCH -N 1                    # 1 nodes
+#SBATCH --ntasks-per-node=1     # 1 tasks/node
+#SBATCH -c 8                    # 8 cores/task
+#SBATCH --mem=0
+#SBATCH -J ana_Fe3_m_0.1
+#SBATCH -o ana_mol_0.1/out.%J
+#SBATCH -e ana_mol_0.1/err.%J
+
+# Load modules
+module reset
+module load intel mkl
+
+# Export gcc path and num_threads
+export LD_LIBRARY_PATH=/sw/cades-open/gcc/12.2.0/lib64:$LD_LIBRARY_PATH
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+
+# Initializing jobs
+cd $SLURM_SUBMIT_DIR
+echo "begin job to analyze gro files  @start time: ${date}"
+echo $PWD
+
+outdir='ana_mol_0.1'
+mkdir -p ${outdir}
+wait
+
+# Run everything for long trajs
+./ana.o anainp_long.txt
+wait
+
+# Run ONLY dynamic sqt for short trajs
+./ana.o anainp_short.txt
+wait
+
+# analysis input and log output
+cp anainp.txt ${outdir}/
+mv log_* ${outdir}/
+
+# all types output
+mv ciontype_* ${outdir}/
+mv iontype_* ${outdir}/
+mv COMlist.txt ${outdir}
+
+# rdf outputs
+mv rdf_* ${outdir}/
+
+# cluster analysis outputs
+mv clusttime_* ${outdir}/
+mv scnt.txt ${outdir}/
+mv all_neigh.txt ${outdir}/
+mv clust_* ${outdir}/
+
+# coordination analysis outputs
+mv catanneigh_* ${outdir}/
+
+# diffusion files output
+mv iondiff_* ${outdir}/
+mv countiondiff_* ${outdir}/
+mv COMdiff_* ${outdir}/
+
+# residence time files output
+mv autocorrcion_* ${outdir}/
+mv autocorrion_* ${outdir}/
+
+# move Fskt files
+mv Fskt* ${outdir}
+
+echo "End of run.."

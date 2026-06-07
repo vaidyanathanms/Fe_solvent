@@ -1,0 +1,48 @@
+datafile
+confout_all_0ps.gro
+trajectory_file
+traj_npt_main_nojump.gro
+nframes
+1000
+freqfr
+0
+start_time
+52000
+name_to_type_map
+19
+FE3P 1
+OW 2
+HW1 3
+HW2 3
+1N 4
+1S 5
+2S 5
+1O 6
+2O 6
+3O 6
+4O 6
+1C 7
+2C 7
+1F 8
+2F 8
+3F 8
+4F 8
+5F 8
+6F 8
+ion_type
+1
+cion_type
+6
+com_types
+5
+4 5 6 7 8
+compute_catanneigh
+1 60 0.22
+compute_dynfskt
+2 4 0.33 0.1 6
+compute_iondiff
+1 5
+compute_ciondiff
+1 5
+compute_catanrestime
+1.9
