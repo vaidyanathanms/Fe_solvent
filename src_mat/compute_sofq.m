@@ -6,18 +6,44 @@ clear;
 close all;
 
 
-%% Input data
+%% Input dat3
 fe_charge    = 3; %or 3
 lorch_window = 1; % 0 - No Lorch Window; 1 - Lorch Window; 2 - Lorch Window Amalie
 norm_den     = 'add'; % 'denom','add','none'
-molality     = cellstr({"0.1","0.2","0.4","1.0"}); % String type
-nmolec_wat   = [5551; 5551; 5551; 5551]; % number of water molecules
-nmolec_fe    = [10; 20; 40; 100]; % number of iron molecules
-nmolec_tfsi  = fe_charge*nmolec_fe; % number of tfsi molecules
-% lx: 1st row - intentionally -1, 2nd row - Fe+2; 3rd row - Fe+3
-avg_boxlen   = [-1, -1, -1, -1;
-                55.7297, 56.1992, 57.1109, 59.6802;
-                55.9235, 56.5808, 57.8513, 61.3732]; %in angstroms
+molality     = cellstr({"0.1","0.2","0.4","1.0","2.5","5.0"}); % String type
+trial_ID     = 5; % ID for trials
+rdf_dirarr   = [1] %,2,3];%1,2,3];
+clr_arr      = {'g','b','r','m','c',"#ffa500",'k',"#f4a460"};
+
+if trial_ID == 2
+  nmolec_wat   = [5551; 5551; 5551; 5551]; % number of water molecules
+  nmolec_fe    = [10; 20; 40; 100]; % number of iron molecules
+  nmolec_tfsi  = fe_charge*nmolec_fe; % number of tfsi molecules
+  % lx: 1st row - intentionally -1, 2nd row - Fe+2; 3rd row - Fe+3
+  avg_boxlen   = [-1, -1, -1, -1;
+  55.7297, 56.1992, 57.1109, 59.6802;
+  55.9235, 56.5808, 57.8513, 61.3732]; %in angstroms
+
+elseif trial_ID == 4
+  nmolec_wat   = 3*[5551; 5551; 5551; 5551]; % number of water molecules
+  nmolec_fe    = 3*[10; 20; 40; 100]; % number of iron molecules
+  nmolec_tfsi  = fe_charge*nmolec_fe; % number of tfsi molecules
+  % lx: 1st row - intentionally -1, 2nd row - Fe+2; 3rd row - Fe+3
+  avg_boxlen   = [-1, -1, -1, -1;
+  80.3756, 81.0515, 82.3685, 86.0815;
+  80.6570, 81.6041, 83.4385, 88.5184]; %in angstroms
+
+elseif trial_ID == 5
+  nmolec_wat   = 3*[5551; 5551; 5551; 5551; 5551; 5551]; % number of water molecules
+  nmolec_fe    = 3*[10; 20; 40; 100; 250; 500]; % number of iron molecules
+  nmolec_tfsi  = fe_charge*nmolec_fe; % number of tfsi molecules
+  % lx: 1st row - intentionally -1, 2nd row - Fe+2; 3rd row - Fe+3
+  avg_boxlen   = [-1, -1, -1, -1, -1, -1;
+  80.3756, 81.0515, 82.3685, 86.0815, -1, -1;
+  80.6987, 81.683, 83.5834, 88.8001, 99.5784, 113.194;]; %in angstroms
+else
+  error(sprintf('Unknown details for trial_ID = %d', trial_ID));
+end
 
 Rcut_arr     = avg_boxlen/2;
 clr_arr      = {'g','b','r','m','c',"#ffa500",'k',"#f4a460"};
@@ -45,238 +71,326 @@ H_coeff   = [0.489918, 20.6593, 0.262003, 7.74039, 0.196767, 49.55190, 0.049879,
 Fe3_coeff = [11.17640, 4.61470,	7.386300,	0.30050, 3.394800, 11.67290, 0.072400, 38.5566,	0.970700];
 
 if fe_charge == 2
-  Fe_bfac = compute_sofq_from_coeff(Fe2_coeff,qvec);
+  Fe_bfac = compute_bq_from_coeff(Fe2_coeff,qvec);
 else
-  Fe_bfac = compute_sofq_from_coeff(Fe3_coeff,qvec);
+  Fe_bfac = compute_bq_from_coeff(Fe3_coeff,qvec);
 end
 
-
-N_bfac   = compute_sofq_from_coeff(N_coeff,qvec);
-O_bfac   = compute_sofq_from_coeff(O_coeff,qvec);
-F_bfac   = compute_sofq_from_coeff(F_coeff,qvec);
-C_bfac   = compute_sofq_from_coeff(C_coeff,qvec);
-S_bfac   = compute_sofq_from_coeff(S_coeff,qvec);
-OW_bfac  = compute_sofq_from_coeff(O_coeff,qvec); % same as O_bfac
-H_bfac   = compute_sofq_from_coeff(H_coeff,qvec);
+N_bfac   = compute_bq_from_coeff(N_coeff,qvec);
+O_bfac   = compute_bq_from_coeff(O_coeff,qvec);
+F_bfac   = compute_bq_from_coeff(F_coeff,qvec);
+C_bfac   = compute_bq_from_coeff(C_coeff,qvec);
+S_bfac   = compute_bq_from_coeff(S_coeff,qvec);
+OW_bfac  = compute_bq_from_coeff(O_coeff,qvec); % same as O_bfac
+H_bfac   = compute_bq_from_coeff(H_coeff,qvec);
 
 all_bqfacs = [Fe_bfac, N_bfac, O_bfac, F_bfac, C_bfac, S_bfac, OW_bfac, H_bfac];
 
 if length(all_bqfacs(1,:)) != ntypes
-  error("Wrong number of coefficients in all_bqfacs \n")
+  error("Inconsistent number of coefficients in all_bqfacs \n")
 end
 
 
-tot_sofq = zeros(length(qvec),length(molality(:)));  % Zero total structure factor
+ndir_avgs = zeros(length(molality(:))); % Averages for tot_sofq
+avg_sofq = zeros(length(qvec),length(molality(:)));  % Zero average structure factor
 
 %% Main calculations
-for molcnt = 1:length(molality(:)) %
+for dircnt = 1:length(rdf_dirarr)
 
-  printf('Analyzing  Fe-%d at molality = %s M with lorch window type: %d and norm_type: %s\n',...
-  fe_charge,char(molality{molcnt}),lorch_window,norm_den)
+  tot_sofq = zeros(length(qvec),length(molality(:)));  % Zero total structure factor
 
-  % Fraction Calculations
-  % Fe atoms
-  natoms_Fe    = nmolec_fe(molcnt);
+  for molcnt = 1:length(molality(:))
 
-  % TFSI atoms
-  natoms_N     = nmolec_tfsi(molcnt);
-  natoms_OTFSI = nmolec_tfsi(molcnt)*4;
-  natoms_F     = nmolec_tfsi(molcnt)*6;
-  natoms_C     = nmolec_tfsi(molcnt)*2;
-  natoms_S     = nmolec_tfsi(molcnt)*2;
+    if trial_ID == 4
+      dirname = sprintf('./../../FeTFSI/results_all_trial%d/rdf_fetfsi%d/rdfall_mol_%s/rdfall%d_%s', ...
+      trial_ID,fe_charge,char(molality{molcnt}),rdf_dirarr(dircnt),char(molality{molcnt}));
+    elseif trial_ID == 5
+      dirname = sprintf('./../../FeTFSI/results_all_trial%d/fetfsi_%d/rdf_all/rdfall_%s', ...
+      trial_ID,fe_charge,char(molality{molcnt}));
+    end
 
-  % Water atoms
-  natoms_OW    = nmolec_wat(molcnt);
-  natoms_H     = nmolec_wat(molcnt)*2;
+    if molcnt == 1
+      printf('Analyzing  directory: rdfall%d\n', rdf_dirarr(dircnt));
+    end
 
-  % Total atoms
-  natoms_O     = natoms_OW + natoms_OTFSI;
-  natoms_tfsi  = natoms_N  + natoms_OTFSI + natoms_F + natoms_C + natoms_S;
-  natoms_wat   = natoms_OW + natoms_H;
-  ntot_atoms   = natoms_wat + natoms_Fe + natoms_tfsi;
+    if ~exist(dirname,"dir")
+
+      printf('Directory: %s does not exist\n', dirname);
+      continue;
+
+    end % End if ~exist
+
+    printf('Analyzing  Fe-%d at molality = %s M with lorch window type: %d and norm_type: %s\n',...
+    fe_charge,char(molality{molcnt}),lorch_window,norm_den)
+
+    % Fraction Calculations
+    % Fe atoms
+    natoms_Fe    = nmolec_fe(molcnt);
+
+    % TFSI atoms
+    natoms_N     = nmolec_tfsi(molcnt);
+    natoms_OTFSI = nmolec_tfsi(molcnt)*4;
+    natoms_F     = nmolec_tfsi(molcnt)*6;
+    natoms_C     = nmolec_tfsi(molcnt)*2;
+    natoms_S     = nmolec_tfsi(molcnt)*2;
+
+    % Water atoms
+    natoms_OW    = nmolec_wat(molcnt);
+    natoms_H     = nmolec_wat(molcnt)*2;
+
+    % Total atoms
+    natoms_O     = natoms_OW + natoms_OTFSI;
+    natoms_tfsi  = natoms_N  + natoms_OTFSI + natoms_F + natoms_C + natoms_S;
+    natoms_wat   = natoms_OW + natoms_H;
+    ntot_atoms   = natoms_wat + natoms_Fe + natoms_tfsi;
 
 
-  if (natoms_H + natoms_C + natoms_N + natoms_O + natoms_F + natoms_S + natoms_Fe) != ntot_atoms
-    printf('%d \t %d \n',natoms_H + natoms_C + natoms_N + natoms_O + natoms_F + natoms_S + natoms_Fe, ntot_atoms);
-    error('Wrong total number of atoms \n')
-  end
+    if (natoms_H + natoms_C + natoms_N + natoms_O + natoms_F + natoms_S + natoms_Fe) != ntot_atoms
+      printf('%d \t %d \n',natoms_H + natoms_C + natoms_N + natoms_O + natoms_F + natoms_S + natoms_Fe, ntot_atoms);
+      error('Wrong total number of atoms \n')
+    end
 
-  at_frac = [natoms_Fe, natoms_N, natoms_OTFSI, natoms_F, natoms_C, natoms_S, natoms_OW, natoms_H];
-  at_frac = at_frac/ntot_atoms;
-  natoms_dens  = ntot_atoms/(avg_boxlen(fe_charge,molcnt)^3);
-  Rcut_lorch = Rcut_arr(fe_charge,molcnt);
+    at_frac = [natoms_Fe, natoms_N, natoms_OTFSI, natoms_F, natoms_C, natoms_S, natoms_OW, natoms_H];
+    at_frac = at_frac/ntot_atoms;
+    natoms_dens  = ntot_atoms/(avg_boxlen(fe_charge,molcnt)^3);
+    Rcut_lorch = Rcut_arr(fe_charge,molcnt);
 
-  % Compute denominator (CHECK the DERIVATION)
-  normval = zeros(length(qvec),1);
-  for dcnt = 1:ntypes
-    normval  = normval + at_frac(dcnt)*all_bqfacs(:,dcnt);
-  end
-  normval = normval.*normval;
+    % Compute denominator
+    normval = zeros(length(qvec),1);
+    for dcnt = 1:ntypes
+      normval  = normval + at_frac(dcnt)*all_bqfacs(:,dcnt);
+    end
+    normval = normval.*normval;
 
-  % Zero sofq data
-  Sofq = zeros(ntypes,ntypes,length(qvec));
 
-  % Load RDF files
-  for nt1 = 1:ntypes
-    fname    = sprintf('./../../FeTFSI/results_all/rdf_fetfsi%d/rdfall_%s/rdf_%s_all.xvg',fe_charge,char(molality{molcnt}),char(type_str{nt1}));
-    rdf_arr  = dlmread(fname,'',31,0); %skip 31 lines
+    % Zero sofq data
+    Sofq = zeros(ntypes,ntypes,length(qvec));
 
-    % Heart of the calculations
-    for qcnt = 1:length(qvec)
-      qval   = qvec(qcnt);
+    for nt1 = 1:ntypes
 
-      for nt2 = 1:ntypes
-
-        qprefac  = 4*pi*natoms_dens*at_frac(nt1)*at_frac(nt2)*all_bqfacs(qcnt,nt1)*all_bqfacs(qcnt,nt2)/qval;
-        rarr     = 10*rdf_arr(:,1); % Factor 10 for conversion to angstroms
-        integral_val = compute_integral(qval,rarr(2:length(rarr)),rdf_arr(2:length(rarr),nt2+1),Rcut_lorch,lorch_window);
-        Sofq(nt1,nt2,qcnt) = qprefac*integral_val;
-
+      % Load RDF files
+      fname    = sprintf('%s/rdf_%s_all.xvg',dirname,char(type_str{nt1}));
+      if ~exist(fname,"file")
+        disp(sprintf('ERROR: %s does not exist. Aborting calculations for %s!',fname,char(molality{molcnt})))
+        break
+      else
+        nskiplines = count_commentlines_xvg(fname);
       end
 
-    end
+      rdf_arr  = dlmread(fname,'',nskiplines,0); %skip header lines
 
-  end
+      % Heart of the calculations
+      for qcnt = 1:length(qvec)
+        qval   = qvec(qcnt);
 
-  % Compute total structure factor
-  for i1 = 1:ntypes
-    for j1 = 1:ntypes
-      for k1 = 1:length(qvec)
-        tot_sofq(k1,molcnt) = tot_sofq(k1,molcnt) + Sofq(i1,j1,k1);
+        for nt2 = 1:ntypes
+
+          qprefac  = 4*pi*natoms_dens*at_frac(nt1)*at_frac(nt2)*all_bqfacs(qcnt,nt1)*all_bqfacs(qcnt,nt2)/qval;
+          rarr     = 10*rdf_arr(:,1); % Factor 10 for conversion to angstroms
+          integral_val = compute_integral(qval,rarr(2:length(rarr)),rdf_arr(2:length(rarr),nt2+1),Rcut_lorch,lorch_window);
+          Sofq(nt1,nt2,qcnt) = qprefac*integral_val;
+
+        end
       end
-    end
-  end
 
-  if strcmp(norm_den,'denom')
-    tot_sofq(:,molcnt) = tot_sofq(:,molcnt)./normval;
-  elseif strcmp(norm_den,'add')
-    tot_sofq(:,molcnt) = tot_sofq(:,molcnt) + normval;
-  elseif strcmp(norm_den,'none')
-    tot_sofq(:,molcnt) = tot_sofq(:,molcnt);
-  else
-    error('Unknown norm_den keyword\n')
-  endif
+    end % End for nt1=1:ntypes
 
-  %% Save to file
-  fid = fopen(sprintf('./../../FeTFSI/sofq_results/sofq_fe_%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
-  fprintf(fid,'%s\t','q');
-  for i1 = 1:ntypes
-    for j1 = 1:ntypes
-      fprintf(fid,'%s-%s\t',type_str{i1},type_str{j1});
-    end
-  end
-  fprintf(fid,'TotSofq\n')
-
-  for k1 = 1:length(qvec)
-    fprintf(fid,'%g\t',qvec(k1));
+    % Compute total structure factor
     for i1 = 1:ntypes
       for j1 = 1:ntypes
-        fprintf(fid,'%g\t',Sofq(i1,j1,k1));
+        for k1 = 1:length(qvec)
+          tot_sofq(k1,molcnt) = tot_sofq(k1,molcnt) + Sofq(i1,j1,k1);
+        end
       end
     end
-    fprintf(fid,'%g\n',tot_sofq(k1,molcnt))
-  end
-  fclose(fid);
 
-  %% Analyze water-water
-  inpids = [7;8];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_WW_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
-  normvalWW = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
-  sofq_WW   = compute_partial_sofq(length(qvec),inpids,Sofq);
-  outw = write_partial_sofq(qvec,sofq_WW,fpid,inpids,type_str);
-  fclose(fpid);
+    % Normalize structure factor
+    if strcmp(norm_den,'denom')
+      tot_sofq(:,molcnt) = tot_sofq(:,molcnt)./normval;
+    elseif strcmp(norm_den,'add')
+      tot_sofq(:,molcnt) = tot_sofq(:,molcnt) + normval;
+    elseif strcmp(norm_den,'none')
+      tot_sofq(:,molcnt) = tot_sofq(:,molcnt);
+    else
+      error('Unknown norm_den keyword\n')
+    endif
 
-  %% Analyze water-TFSI
-  inpids = [2;3;4;5;6;7;8];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_WA_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
-  normvalWA = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
-  sofq_WA   = compute_partial_sofq(length(qvec),inpids,Sofq);
-  outw = write_partial_sofq(qvec,sofq_WA,fpid,inpids,type_str);
-  fclose(fpid);
+    % Add to average structure factor
+    avg_sofq(:,molcnt) += tot_sofq(:,molcnt);
 
-  %% Analyze Water-Fe
-  inpids = [1;7;8];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_WF_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
-  normvalWF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
-  sofq_WF   = compute_partial_sofq(length(qvec),inpids,Sofq);
-  outw = write_partial_sofq(qvec,sofq_WF,fpid,inpids,type_str);
-  fclose(fpid);
 
-  %% Analyze TFSI-TFSI
-  inpids = [2;3;4;5;6];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_AA_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
-  normvalAA = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
-  sofq_AA   = compute_partial_sofq(length(qvec),inpids,Sofq);
-  outw = write_partial_sofq(qvec,sofq_AA,fpid,inpids,type_str);
-  fclose(fpid);
+    %% Save tot_sofq to file
+    fid = fopen(sprintf('./../../FeTFSI/sofq_results/trial_%d/sofq_fe_%d_mol_%s_dir_%d_lorwind_%d_norm_%s.dat', ...
+    trial_ID,fe_charge,char(molality{molcnt}),rdf_dirarr(dircnt),lorch_window,norm_den),'w');
 
-  %% Analyze TFSI-Fe
-  inpids = [1;2;3;4;5;6];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_AF_Fe%d_mol_%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
-  normvalAF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
-  sofq_AF   = compute_partial_sofq(length(qvec),inpids,Sofq);
-  outw = write_partial_sofq(qvec,sofq_AF,fpid,inpids,type_str);
-  fclose(fpid);
+    fprintf(fid,'%s\t','q');
+    for i1 = 1:ntypes
+      for j1 = 1:ntypes
+        fprintf(fid,'%s-%s\t',type_str{i1},type_str{j1});
+      end
+    end
+    fprintf(fid,'TotSofq\n')
 
-  %% Analyze Fe-Fe
-  inpids = [1];
-  fpid = fopen(sprintf('./../../FeTFSI/sofq_results/psofq_FF_%d_mol_Fe%s_lorwind_%d_norm_%s.dat',fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
-  normvalFF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
-  sofq_FF   = compute_partial_sofq(length(qvec),inpids,Sofq);
-  outw = write_partial_sofq(qvec,sofq_FF,fpid,inpids,type_str);
-  fclose(fpid);
+    for k1 = 1:length(qvec)
+      fprintf(fid,'%g\t',qvec(k1));
+      for i1 = 1:ntypes
+        for j1 = 1:ntypes
+          fprintf(fid,'%g\t',Sofq(i1,j1,k1));
+        end
+      end
+      fprintf(fid,'%g\n',tot_sofq(k1,molcnt))
+    end
+    fclose(fid);
 
-  %% Plot partial structure factors
+    %% Analyze water-water
+    inpids = [7;8];
+    fpid = fopen(sprintf('./../../FeTFSI/analyzed_results/results_all_trial%d/fetfsi_%d/sofq_results/psofq_WW_Fe%d_mol_%s_dir_%d_lorwind_%d_norm_%s.dat', ...
+    trial_ID,fe_charge,fe_charge,char(molality{molcnt}),rdf_dirarr(dircnt),lorch_window,norm_den),'w');
+    normvalWW = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
+    sofq_WW   = compute_partial_sofq(length(qvec),inpids,Sofq);
+    outw = write_partial_sofq(qvec,sofq_WW,fpid,inpids,type_str);
+    fclose(fpid);
+
+    %% Analyze water-TFSI
+    inpids = [2;3;4;5;6;7;8];
+    fpid = fopen(sprintf('./../../FeTFSI/analyzed_results/results_all_trial%d/fetfsi_%d/sofq_results/psofq_WA_Fe%d_mol_%s_dir_%d_lorwind_%d_norm_%s.dat', ...
+    trial_ID,fe_charge,fe_charge,char(molality{molcnt}),rdf_dirarr(dircnt),lorch_window,norm_den),'w');
+    normvalWA = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
+    sofq_WA   = compute_partial_sofq(length(qvec),inpids,Sofq);
+    outw = write_partial_sofq(qvec,sofq_WA,fpid,inpids,type_str);
+    fclose(fpid);
+
+    %% Analyze Water-Fe
+    inpids = [1;7;8];
+    fpid = fopen(sprintf('./../../FeTFSI/analyzed_results/results_all_trial%d/fetfsi_%d/sofq_results/psofq_WF_Fe%d_mol_%s_dir_%d_lorwind_%d_norm_%s.dat', ...
+    trial_ID,fe_charge,fe_charge,char(molality{molcnt}),rdf_dirarr(dircnt),lorch_window,norm_den),'w');
+    normvalWF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
+    sofq_WF   = compute_partial_sofq(length(qvec),inpids,Sofq);
+    outw = write_partial_sofq(qvec,sofq_WF,fpid,inpids,type_str);
+    fclose(fpid);
+
+    %% Analyze TFSI-TFSI
+    inpids = [2;3;4;5;6];
+    fpid = fopen(sprintf('./../../FeTFSI/analyzed_results/results_all_trial%d/fetfsi_%d/sofq_results/psofq_AA_Fe%d_mol_%s_dir_%d_lorwind_%d_norm_%s.dat', ...
+    trial_ID,fe_charge,fe_charge,char(molality{molcnt}),rdf_dirarr(dircnt),lorch_window,norm_den),'w');
+    normvalAA = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
+    sofq_AA   = compute_partial_sofq(length(qvec),inpids,Sofq);
+    outw = write_partial_sofq(qvec,sofq_AA,fpid,inpids,type_str);
+    fclose(fpid);
+
+    %% Analyze TFSI-Fe
+    inpids = [1;2;3;4;5;6];
+    fpid = fopen(sprintf('./../../FeTFSI/analyzed_results/results_all_trial%d/fetfsi_%d/sofq_results/psofq_AF_Fe%d_mol_%s_dir_%d_lorwind_%d_norm_%s.dat', ...
+    trial_ID,fe_charge,fe_charge,char(molality{molcnt}),rdf_dirarr(dircnt),lorch_window,norm_den),'w');
+    normvalAF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
+    sofq_AF   = compute_partial_sofq(length(qvec),inpids,Sofq);
+    outw = write_partial_sofq(qvec,sofq_AF,fpid,inpids,type_str);
+    fclose(fpid);
+
+    %% Analyze Fe-Fe
+    inpids = [1];
+    fpid = fopen(sprintf('./../../FeTFSI/analyzed_results/results_all_trial%d/fetfsi_%d/sofq_results/psofq_FF_%d_mol_%s_dir_%d_lorwind_%d_norm_%s.dat', ...
+    trial_ID,fe_charge,fe_charge,char(molality{molcnt}),rdf_dirarr(dircnt),lorch_window,norm_den),'w');
+    normvalFF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
+    sofq_FF   = compute_partial_sofq(length(qvec),inpids,Sofq);
+    outw = write_partial_sofq(qvec,sofq_FF,fpid,inpids,type_str);
+    fclose(fpid);
+
+    %% Plot partial structure factors
+    h = figure;
+    hold on;
+    box on
+    grid on;
+    leg_arr = {};
+    plot(qvec,sofq_WW,'color',clr_arr{1},'LineWidth',2);
+    leg_arr{1} = 'Water-Water';
+    plot(qvec,sofq_WA,'color',clr_arr{2},'LineWidth',2);
+    leg_arr{2} = 'Water-TFSI';
+    plot(qvec,sofq_WF,'color',clr_arr{3},'LineWidth',2);
+    leg_arr{3} = 'Water-Fe';
+    plot(qvec,sofq_AA,'color',clr_arr{4},'LineWidth',2);
+    leg_arr{4} = 'TFSI-TFSI';
+    plot(qvec,sofq_AF,'color',clr_arr{5},'LineWidth',2);
+    leg_arr{5} = 'TFSI-Fe';
+    plot(qvec,sofq_FF,'color',clr_arr{6},'LineWidth',2);
+    leg_arr{6} = 'Fe-Fe';
+    xlim([0.9*qmin 1.1*qmax])
+    xlabel('q','FontSize',20)
+    ylabel('I(q)','FontSize',20)
+    set(gca, 'FontSize', 12)
+    set(gca, 'xscale', 'log')
+    set(gca, 'xtick', [0.1 0.2 0.3 0.5 0.7 0.9 1.1]);
+    set(gca,'XtickLabel', [0.1 0.2 0.3 0.5 0.7 0.9 1.1])
+    legend(leg_arr,'location','bestoutside')
+    saveas(h,sprintf('./../../FeTFSI/figures/results_all_trial%d/fetfsi_%d/sofq_all/partialsq_mol_%s_Fe_%d_lorwind_%d_norm_%s_dir_%d.png', ...
+    trial_ID,fe_charge,char(molality{molcnt}),fe_charge,lorch_window,norm_den,rdf_dirarr(dircnt)));
+    close(h);
+
+    ndir_avgs(molcnt) += 1;
+
+  end % End for molcnt = 1:length(molality(:))
+
+  % Plot total structure factor
   h = figure;
-  hold on;
+  hold on
   box on
-  grid on;
-  leg_arr = {};
-  plot(qvec,sofq_WW,'color',clr_arr{1},'LineWidth',2);
-  leg_arr{1} = 'Water-Water';
-  plot(qvec,sofq_WA,'color',clr_arr{2},'LineWidth',2);
-  leg_arr{2} = 'Water-TFSI';
-  plot(qvec,sofq_WF,'color',clr_arr{3},'LineWidth',2);
-  leg_arr{3} = 'Water-Fe';
-  plot(qvec,sofq_AA,'color',clr_arr{4},'LineWidth',2);
-  leg_arr{4} = 'TFSI-TFSI';
-  plot(qvec,sofq_AF,'color',clr_arr{5},'LineWidth',2);
-  leg_arr{5} = 'TFSI-Fe';
-  plot(qvec,sofq_FF,'color',clr_arr{6},'LineWidth',2);
-  leg_arr{6} = 'Fe-Fe';
-  xlim([0.9*qmin 1.1*qmax])
+  grid on
+  leg_arr={};
+  for i = 1:length(molality(:))
+    plot(qvec,tot_sofq(:,i),'color',clr_arr{i},'LineWidth',2)
+    leg_arr{i} = molality{i};
+  end
+  xlim([0.09 1.1*qmax])
+  ylim([0.9*min(min(tot_sofq)) 1.1*max(max(tot_sofq))])
   xlabel('q','FontSize',20)
   ylabel('I(q)','FontSize',20)
   set(gca, 'FontSize', 12)
   set(gca, 'xscale', 'log')
-  set(gca, 'xtick', 0.1:0.3:1);
-  set(gca,'XtickLabel', [0.1 0.4 0.7 1.0])
+  set(gca, 'yscale', 'log')
+  set(gca, 'xtick', [0.1 0.2 0.3 0.4 0.5 0.7 0.9 1.1]);
+  set(gca,'XtickLabel', [0.1 0.2 0.3 0.4 0.5 0.7 0.9 1.1])
   legend(leg_arr,'location','bestoutside')
-  saveas(h,sprintf('./../../FeTFSI/figures/partialsq_mol_%s_Fe_%d_norm_%s.png',char(molality{molcnt}),fe_charge,norm_den))
+  saveas(h,sprintf('./../../FeTFSI/figures/results_all_trial%d/fetfsi_%d/sofq_all/TotSofq_Fe_%d_lorwind_%d_dir_%d',...
+  trial_ID,fe_charge,fe_charge,lorch_window,rdf_dirarr(dircnt)),'png')
+  close(h);
+
+end % End for dircnt = 1:length(rdf_dirarr)
+
+%% normalize and save avg_sofq to file
+for molcnt = 1:length(molality(:))
+
+  avg_sofq(:,molcnt) = avg_sofq(:,molcnt)/ndir_avgs(molcnt); %Normalize
+  faid = fopen(sprintf('./../../FeTFSI/analyzed_results/results_all_trial%d/fetfsi_%d/sofq_results/avgsofq_fe_%d_mol_%s_lorwind_%d_norm_%s.dat',...
+  trial_ID,fe_charge,fe_charge,char(molality{molcnt}),lorch_window,norm_den),'w');
+  fprintf(faid,'%s\t%s\n','q','AvgSofq');
+  for k1 = 1:length(qvec)
+    fprintf(faid,'%g\t%g\n',qvec(k1),avg_sofq(k1,molcnt));
+  end
+  fclose(faid);
 
 end
 
-
-
-clr_arr = {'g','b','r','m'};
+% Plot average structure factor
 h = figure;
 hold on
 box on
 grid on
 leg_arr={};
 for i = 1:length(molality(:))
-  plot(qvec,tot_sofq(:,i),'color',clr_arr{i},'LineWidth',2)
+  plot(qvec,avg_sofq(:,i),'color',clr_arr{i},'LineWidth',2)
   leg_arr{i} = molality{i};
 end
-xlim([0.9*qmin 1.1*qmax])
-ylim([0.9*min(min(tot_sofq)) 1.1*max(max(tot_sofq))])
+xlim([0.29 1.1*qmax])
+ylim([0.9*min(min(avg_sofq)) 1.1*max(max(avg_sofq))])
 xlabel('q','FontSize',20)
 ylabel('I(q)','FontSize',20)
 set(gca, 'FontSize', 12)
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
-set(gca, 'xtick', 0.1:0.3:1);
-set(gca,'XtickLabel', [0.1 0.4 0.7 1.0])
+set(gca, 'xtick', [0.3 0.4 0.5 0.7 0.9 1.1]);
+set(gca,'XtickLabel', [0.3 0.4 0.5 0.7 0.9 1.1])
 legend(leg_arr,'location','bestoutside')
-saveas(h,sprintf('./../../FeTFSI/figures/Fe_%d_lorwind_%d',fe_charge,lorch_window),'png')
+saveas(h,sprintf('./../../FeTFSI/figures/results_all_trial%d/fetfsi_%d/sofq_all/AvgSofq_Fe_%d_lorwind_%d', ...
+trial_ID,fe_charge,fe_charge,lorch_window),'png')
+
 
