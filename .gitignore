@@ -1,4 +1,5 @@
 src_gmx/gropbd_files/#*
 src_mat/*.dat
 src_f90/*~
+src_py/*~
 src_f90/analyze_withions3.f90
