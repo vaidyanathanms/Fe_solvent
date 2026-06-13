@@ -1,4 +1,10 @@
-# Plots g(r) and n(r)
+# Plots S(q) and partial S(q)
+# How to use
+# 1. Use the scripts in src_mat to compute S(q) and partial S(q)
+# 2. Check whether the files are saved in
+# ../../FeTFSI/analyzed_results/sofq_all
+
+
 # Import modules
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,83 +26,56 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Arial'] + plt.rcParams['font.serif']
 
 # Inputs
-dirkey   = 'rdf'
+dirkey   = 'sofq'
 fecharge = 3
 trialnum = 5
 molality = ['0.1','0.2','0.4','1.0','2.5','5.0']
 
-# RDF inputs
-rdf_refatom = 'Fe'
-rdf_keys    = {'Fe':1,'NTFSI':2,'OTFSI':3,'FTFSI':4,'OW':7}
-maxxlimplt  = [3.0,2,1.2,1.0,0.3]
+# Sofq inputs
+sofq_pairs = ['FF','AA','AF','WF','WA','WW']
 maxylimplt = [5,5,15,15,10]
-rcol  = 0
 
 # Directory info
-dirsuffix  = 'results_all_trial'+str(trialnum)+'/fetfsi_'+str(fecharge)
-headdir    = '../../FeTFSI/' + dirsuffix
+dirsuffix  = 'analyzed_results/results_all_trial'+str(trialnum)+'/fetfsi_'+str(fecharge)
+headdir    = '../../FeTFSI/' +  dirsuffix
 resultdir  = headdir + '/' + dirkey + '_all'
 figdir     = '../../FeTFSI/figures/' + dirsuffix +'/' + dirkey + '_all'
 
-if not os.path.isdir(headdir):
-    raise RuntimeError(f'No simulation head directory: {headdir} found')
-
-if not os.path.isdir(figdir):
-    os.mkdir(figdir)
-
-
 # Define axes labels for distribution
-for cid, (rdfkey,rdfcolval) in enumerate(rdf_keys.items()):
+for inum,molval in enumerate(molality): # loop in molval
 
-    print(f'Analyzing {rdf_refatom} - {rdfkey}')
-    
-    # Plot g(r) data
+    print(f"Analyzing {molval} m")    
+    # Plot S(q) data
     fig1, ax1 = plt.subplots()
-    gxlabel = rf'$r$ (nm)'
-    gylabel = rf'$g_{{\mathrm{{{rdf_refatom}-{rdfkey}}}}}(r)$'
+    gxlabel = r'$q$ (nm$^{-1}$)'
+    gylabel = r'$I(q)$'
     ax1.set_xlabel(gxlabel,fontsize=16)
     ax1.set_ylabel(gylabel,fontsize=16)
     plt.style.use('seaborn-colorblind')
     plt.tight_layout()
 
-          
-    # Plot n(r) data
+    # Check file
+    Itotfname   = anadir + '/avgsofq_' + rdf_refatom + '_all.xvg'
+    if not os.path.exists(gfname):
+        warnings.warn(f"{gfname} does not exist in {anadir} ")
+        continue
+
+         
+    # Plot partial S(q) data
     fig2, ax2 = plt.subplots()
-    nxlabel = rf'$r$ (nm)'
-    nylabel = rf'$n_{{\mathrm{{{rdf_refatom}-{rdfkey}}}}}(r)$'
+    gxlabel = r'$q$ (nm$^{-1}$)'
+    gylabel = r'$I_{AB}(q)$'
     ax2.set_xlabel(nxlabel,fontsize=20)
     ax2.set_ylabel(nylabel,fontsize=20)
     plt.style.use('seaborn-colorblind')
     plt.tight_layout()
 
-    # Plot combined g(r)/n(r) data
-    fig3, ax3 = plt.subplots()
-    gnxlabel = rf'$r$ (nm)'
-    gnylabel = rf'$g_{{\mathrm{{{rdf_refatom}-{rdfkey}}}}}(r)$, $n_{{\mathrm{{{rdf_refatom}-{rdfkey}}}}}(r)$'
-    ax3.set_xlabel(gnxlabel,fontsize=20)
-    ax3.set_ylabel(gnylabel,fontsize=20)
-    plt.style.use('seaborn-colorblind')
-    plt.tight_layout()
-    
+    for sid,spair in enumerate(sofq_pairs):
 
-    for inum,molval in enumerate(molality): # loop in molval
-
-        print(f"Analyzing {molval} m")
-        nfylcnt = 0
-
-        anadir = resultdir + '/rdf_mol_' + str(molval)
-        if not os.path.isdir(anadir):
-            warnings.warn(f'{anadir} does not exist')
-            continue
+        print(f'Analyzing {spair}')
 
         # Check file
-        gfname  = anadir + '/rdf_' + rdf_refatom + '_all.xvg'
-        if not os.path.exists(gfname):
-            warnings.warn(f"{gfname} does not exist in {anadir} ")
-            continue
-
-        # Check file
-        nfname  = anadir + '/nrdf_' + rdf_refatom + '_all.xvg'
+        Ipartfname  = anadir + '/psofq_' + rdf_refatom + '_all.xvg'
         if not os.path.exists(nfname):
             warnings.warn(f"{nfname} does not exist in {anadir} ")
             continue
@@ -147,4 +126,6 @@ for cid, (rdfkey,rdfcolval) in enumerate(rdf_keys.items()):
     plt.close(fig1)
     plt.close(fig2)
     plt.close(fig3)
+
+
 
