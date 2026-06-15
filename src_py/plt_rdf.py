@@ -64,8 +64,8 @@ for cid, (rdfkey,rdfcolval) in enumerate(rdf_keys.items()):
     fig2, ax2 = plt.subplots()
     nxlabel = rf'$r$ (nm)'
     nylabel = rf'$n_{{\mathrm{{{rdf_refatom}-{rdfkey}}}}}(r)$'
-    ax2.set_xlabel(nxlabel,fontsize=20)
-    ax2.set_ylabel(nylabel,fontsize=20)
+    ax2.set_xlabel(nxlabel,fontsize=16)
+    ax2.set_ylabel(nylabel,fontsize=16)
     plt.style.use('seaborn-colorblind')
     plt.tight_layout()
 
@@ -73,8 +73,8 @@ for cid, (rdfkey,rdfcolval) in enumerate(rdf_keys.items()):
     fig3, ax3 = plt.subplots()
     gnxlabel = rf'$r$ (nm)'
     gnylabel = rf'$g_{{\mathrm{{{rdf_refatom}-{rdfkey}}}}}(r)$, $n_{{\mathrm{{{rdf_refatom}-{rdfkey}}}}}(r)$'
-    ax3.set_xlabel(gnxlabel,fontsize=20)
-    ax3.set_ylabel(gnylabel,fontsize=20)
+    ax3.set_xlabel(gnxlabel,fontsize=16)
+    ax3.set_ylabel(gnylabel,fontsize=16)
     plt.style.use('seaborn-colorblind')
     plt.tight_layout()
     
