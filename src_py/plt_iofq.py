@@ -84,7 +84,7 @@ for inum,molval in enumerate(molality): # loop in molval
     ax1.plot(df_itot["q"].to_numpy(),df_itot["AvgIofq"].to_numpy(),color=clr_arr[inum],\
              linestyle='-',linewidth=2.5,label=molval + ' m')
 
-    if float(molval) == 1.0 or float(molval) == 2.5:
+    if float(molval) >= 1.0:
         ax3.plot(df_itot["q"].to_numpy(),df_itot["AvgIofq"].to_numpy(),color=clr_arr[inum],\
                  linestyle='-',linewidth=2.5,label=molval + ' m')
         
@@ -101,7 +101,7 @@ for inum,molval in enumerate(molality): # loop in molval
     if inum == 0: ymin = df_itot["AvgIofq"].min()
     if inum == len(molality)-1: ymax = df_itot["AvgIofq"].max()
     
-    for sid,spair in enumerate(Iofq_pairs):
+    for sid,spair in enumerate(iofq_pairs):
 
         print(f'Analyzing {spair}')
 
@@ -114,7 +114,7 @@ for inum,molval in enumerate(molality): # loop in molval
 
         np_ptot =  np.loadtxt(Ipartfname,skiprows=1,dtype=float)
         ax2.plot(np_ptot[:,0],np_ptot[:,1],color=clr_arr[sid],\
-                 linestyle='--', linewidth=2.5,label=Iofq_labels[sid])
+                 linestyle='--', linewidth=2.5,label=iofq_labels[sid])
                 
 
 
