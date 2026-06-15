@@ -3,7 +3,7 @@ function integral_val = compute_integral(qval,rdata,gofrdata,maxR,lorch_wind)
   %Using Lorch type window
   if (lorch_wind == 1)
     extra_fac    = (pi*rdata)/maxR;
-    wofr         = sin(extra_fac);
+    wofr         = sin(extra_fac)./extra_fac;
   elseif (lorch_wind == 2)
     extra_fac    = (pi*rdata)/maxR;
     exfac_inv    = 1./extra_fac;
