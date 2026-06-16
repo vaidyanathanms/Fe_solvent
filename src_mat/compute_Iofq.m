@@ -58,7 +58,7 @@ ntypes   = length(type_str);
 
 %% Compute factors using the fitting formula
 qmin    = 4*pi/min(avg_boxlen(fe_charge,:));
-qmax    = 1.3;
+qmax    = 1.5;
 delq    = 0.005;
 qvec    = qmin:delq:qmax;
 fprintf('qmin: %g; qmax: %g, delq: %g\n',qmin,qmax,delq)
@@ -302,7 +302,7 @@ for dircnt = 1:length(rdf_dirarr)
     fpid = fopen(sprintf('./../../FeTFSI/analyzed_results/results_all_trial%d/fetfsi_%d/Iofq_results/pIofq_FF_Fe_%d_mol_%s_dir_%d_lorwind_%d_norm_%s.dat', ...
     trial_ID,fe_charge,fe_charge,char(molality{molcnt}),rdf_dirarr(dircnt),lorch_window,norm_den),'w');
     normvalFF = compute_norm_vals(length(qvec),at_frac,all_bqfacs,inpids);
-    Iofq_FF   = compute_partial_Iofq(length(qvec),idsA,idsB,Iofq) + compute_partial_Iofq(length(qvec),idsB,idsA,Iofq);
+    Iofq_FF   = compute_partial_Iofq(length(qvec),idsA,idsB,Iofq);
     outw = write_partial_Iofq(qvec,Iofq_FF,fpid,idsA,idsB,type_str);
     fclose(fpid);
 
