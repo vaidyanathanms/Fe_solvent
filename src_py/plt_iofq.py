@@ -51,17 +51,16 @@ if not os.path.isdir(anadir):
 # Plot S(q)-all data
 fig1, ax1 = plt.subplots()
 xlabel = r'$q$ ($\mathrm{\AA}^{-1}$)'
-xlabel = r'$q$ (nm$^{-1}$)'
 ylabel = r'$I(q)$'
 ax1.set_xlabel(xlabel,fontsize=16)
 ax1.set_ylabel(ylabel,fontsize=16)
 plt.style.use('seaborn-colorblind')
 plt.tight_layout()
 
+
 # Plot S(q)-high data
 fig3, ax3 = plt.subplots()
 xlabel = r'$q$ ($\mathrm{\AA}^{-1}$)'
-xlabel = r'$q$ (nm$^{-1}$)'
 ylabel = r'$I(q)$'
 ax3.set_xlabel(xlabel,fontsize=16)
 ax3.set_ylabel(ylabel,fontsize=16)
@@ -84,8 +83,14 @@ for inum,molval in enumerate(molality): # loop in molval
     ax1.plot(df_itot["q"].to_numpy(),df_itot["AvgIofq"].to_numpy(),color=clr_arr[inum],\
              linestyle='-',linewidth=2.5,label=molval + ' m')
 
-    if float(molval) >= 1.0:
+    if float(molval) == 1.0:
         ax3.plot(df_itot["q"].to_numpy(),df_itot["AvgIofq"].to_numpy(),color=clr_arr[inum],\
+                 linestyle='-',linewidth=2.5,label=molval + ' m')
+    if float(molval) == 2.5:
+        ax3.plot(df_itot["q"].to_numpy(),df_itot["AvgIofq"].to_numpy()+20,color=clr_arr[inum],\
+                 linestyle='-',linewidth=2.5,label=molval + ' m')
+    if float(molval) == 5.0:
+        ax3.plot(df_itot["q"].to_numpy(),df_itot["AvgIofq"].to_numpy()+40,color=clr_arr[inum],\
                  linestyle='-',linewidth=2.5,label=molval + ' m')
         
     
@@ -98,6 +103,18 @@ for inum,molval in enumerate(molality): # loop in molval
     plt.style.use('seaborn-colorblind')
     plt.tight_layout()
 
+    if float(molval) == 0.2: 
+    
+        # Plot partial S(q)-low data
+        figs, axs = plt.subplots()
+        xlabel = r'$q$ ($\mathrm{\AA}^{-1}$)'
+        ylabel = r'$I_{AB}(q)$'
+        ax1.set_xlabel(xlabel,fontsize=16)
+        ax1.set_ylabel(ylabel,fontsize=16)
+        plt.style.use('seaborn-colorblind')
+        plt.tight_layout()
+
+    
     if inum == 0: ymin = df_itot["AvgIofq"].min()
     if inum == len(molality)-1: ymax = df_itot["AvgIofq"].max()
     
@@ -115,7 +132,22 @@ for inum,molval in enumerate(molality): # loop in molval
         np_ptot =  np.loadtxt(Ipartfname,skiprows=1,dtype=float)
         ax2.plot(np_ptot[:,0],np_ptot[:,1],color=clr_arr[sid],\
                  linestyle='--', linewidth=2.5,label=iofq_labels[sid])
-                
+
+
+        if float(molval) == 0.2 and ('F' in spair):
+            axs.plot(np_ptot[:,0],np_ptot[:,1],color=clr_arr[sid],\
+                     linestyle='--', linewidth=2.5,label=iofq_labels[sid])
+            
+
+
+    if float(molval) == 0.2:
+        axs.legend()
+        axs.set_xlim(0.25,1.1)
+        axs.set_xscale('log')
+        axs.set_xticks([0.3,0.4, 0.6, 0.8, 1.0])
+        axs.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'{x:.1f}'))
+        figs.savefig(f'{figdir}/ipartzoom_{molval}.png',dpi=fig2.dpi)
+        plt.close(figs)
 
 
     ax2.legend()
@@ -127,18 +159,18 @@ for inum,molval in enumerate(molality): # loop in molval
     plt.close(fig2)
     
 ax1.legend(loc='upper left')
-ax1.set_xlim(0.25,1.3)
-ax1.set_ylim(ymin-2,ymax+40)
+ax1.set_xlim(0.25,1.5)
+ax1.set_ylim(ymin-2,ymax+20)
 ax1.set_xscale('log')
-ax1.set_xticks([0.3, 0.4, 0.6, 0.8, 1.0])
+ax1.set_xticks([0.3, 0.4, 0.6, 0.8, 1.0,1.3])
 ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'{x:.1f}'))
 fig1.savefig(f'{figdir}/itot_all.png',dpi=fig1.dpi)
 plt.close(fig1)
 
 ax3.legend()
-ax3.set_xlim(0.3,1.0)
+ax3.set_xlim(0.3,1.3)
 ax3.set_xscale('log')
-ax3.set_xticks([0.3, 0.4, 0.6, 0.8, 1.0])
+ax3.set_xticks([0.3, 0.4, 0.6, 0.8, 1.0,1.2])
 ax3.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'{x:.1f}'))
 fig3.savefig(f'{figdir}/itot_highconc.png',dpi=fig1.dpi)
 plt.close(fig3)
