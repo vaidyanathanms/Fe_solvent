@@ -22,7 +22,7 @@ plt.rcParams['font.serif'] = ['Arial'] + plt.rcParams['font.serif']
 fecharge = 3
 trialnum = 5
 
-# Read the Excel file
+# Directory/file details
 dirkey     = 'diffusivity'
 dirsuffix  = 'results_all_trial'+str(trialnum)
 anadir     = '../../FeTFSI/analyzed_results/' +  dirsuffix + '/density_all'

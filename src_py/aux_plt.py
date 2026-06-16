@@ -7,6 +7,7 @@ import csv
 import glob
 import warnings
 from pathlib import Path
+from scipy.optimize import curve_fit
 
 # General copy script
 def gencpy(dum_maindir,dum_destdir,fylname):
@@ -228,6 +229,16 @@ def read_xvg_filedata(fname):
 
     return data
 #-------------------------------------------------------------------------------
+
+# VFT-like model in concentration
+# D(c) = D0 * exp[-B / (c0 - c)]
+# log(D) = log(D0) - B / (c0 - c)
+# We fit log(D) directly
+def log_vft_conc(c, log10D0, B, c0):
+    return log10D0 - (B / (c0 - c)) / np.log(10)
+#-------------------------------------------------------------------------------
+
+
 # if __name__
 if __name__ == '__main__':
     main()
