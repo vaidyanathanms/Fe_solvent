@@ -21,17 +21,22 @@ plt.rcParams['font.serif'] = ['Arial'] + plt.rcParams['font.serif']
 # Inputs
 fecharge = 3
 trialnum = 5
-
+dirkey   = 'diffusivity'
+system   = 'cades' #cades or lap
 # Directory/file details
-dirkey     = 'diffusivity'
-dirsuffix  = 'results_all_trial'+str(trialnum)
-anadir     = '../../FeTFSI/analyzed_results/' +  dirsuffix + '/density_all'
-figdir     = '../../FeTFSI/figures/' + dirsuffix +'/fetfsi_'+str(fecharge) +'/' + dirkey + '_all'
-
+if system == 'cades':
+    dirsuffix  = '/lustre/or-scratch/cades-birthright/vm5/fetfsi/fetfsi_3/trial_5/results_all'
+    anadir     =  dirsuffix + '/density_all'
+    figdir     =  dirsuffix + '/figs_all'
+else:
+    dirsuffix  = 'results_all_trial'+str(trialnum)
+    anadir     = '../../FeTFSI/analyzed_results/' +  dirsuffix + '/density_all'
+    figdir     = '../../FeTFSI/figures/' + dirsuffix +'/fetfsi_'+str(fecharge) +'/' + dirkey + '_all'
+    
 inpfile = f'{anadir}/density.xlsx'
 
 if not os.path.isdir(anadir):
-    raise RuntimeError(f'{anadir} not found')
+    raise RuntimeError(f'analysis directory: {anadir} not found')
 
 if not os.path.exists(inpfile):
     raise RuntimeError(f'{inpfile} not found in {anadir}')
@@ -57,14 +62,15 @@ if not os.path.isdir(figdir):
 fig1,ax1 = plt.subplots()
 ax1.set_xlabel(r'Concentration (m)')
 ax1.set_ylabel(r'Diffusivity (m$^2$/s)')
-plt.style.use('seaborn-colorblind')
+if not system == 'cades':
+    plt.style.use('seaborn-colorblind')
 plt.tight_layout()
-
+print("Plotting Fe/TFSI diffusivities ...")
 plt.errorbar(x, 0.0001*y_fe, yerr=0.0001*err_fe,color=clr_arr[0],\
-             marker='o',markersize=8,capsize=4, linestyle='none',label='Fe')
+             marker='o',markersize=8,capsize=4, linestyle='none',label=r'Fe$^{3+}$')
 
 plt.errorbar(x, 0.0001*y_f, yerr=0.0001*err_f,color=clr_arr[1],\
-             marker='s',markersize=8,capsize=4, linestyle='none',label='F (TFSI)')
+             marker='s',markersize=8,capsize=4, linestyle='none',label=r'TFSI$^{-}$')
 
 plt.legend()
 fig1.savefig(figdir + '/diff_all_Fe' + str(fecharge) +
@@ -75,14 +81,15 @@ fig1.savefig(figdir + '/diff_all_Fe' + str(fecharge) +
 fig2,ax2 = plt.subplots()
 ax2.set_xlabel(r'Concentration (m)')
 ax2.set_ylabel(r'Diffusivity (m$^2$/s)')
-plt.style.use('seaborn-colorblind')
+if not system == 'cades':
+    plt.style.use('seaborn-colorblind')
 plt.tight_layout()
-
+print("Plotting Fe/TFSI diffusivities in semilog scale...")
 plt.errorbar(x, 0.0001*y_fe, yerr=0.0001*err_fe,marker='o',\
-             capsize=4, linestyle='none',label='Fe')
+             capsize=4, linestyle='none',label=r'Fe$^{3+}$')
 
 plt.errorbar(x, 0.0001*y_f, yerr=0.0001*err_f,marker='s',\
-             capsize=4, linestyle='none',label='F (TFSI)')
+             capsize=4, linestyle='none',label=r'TFSI$^{-}$')
 
 plt.yscale('log')
 plt.legend()
@@ -94,7 +101,7 @@ fig2.savefig(figdir + '/logdiff_all_Fe' + str(fecharge) +
 # Fit with VFT data
 
 # Keep only positive diffusivities
-
+print("Computing VFT fits ...")
 mask_fe = (y_fe > 0)
 mask_f  = (y_f > 0)
 
@@ -107,10 +114,29 @@ err_fe = err_fe[mask_fe]
 y_f = y_f[mask_f]
 err_f = err_f[mask_f]
 
+# natural log of diffusivity
+logy_fe = np.log(y_fe)
+logy_f  = np.log(y_f)
+
+# Propagated uncertainty in log(D): sigma_logD ~ sigma_D / D
+# Put a fallback if any error bar is zero or missing
+eps = 1e-30
+siglog_fe = np.where(err_fe > 0, err_fe / np.maximum(y_fe, eps), 1.0)
+siglog_f  = np.where(err_f  > 0, err_f  / np.maximum(y_f,  eps), 1.0)
+
+xmax = np.max(x)
+
+# Initial guesses
+p0_fe = [np.log(np.max(y_fe)), 1.0, xmax + 1.0]
+p0_f  = [np.log(np.max(y_f)),  1.0, xmax + 1.0]
+
+# Bounds: c0 must be > max(x)
+lower_bounds = [-np.inf, 0.0, xmax + 1e-6]
+upper_bounds = [ np.inf, np.inf, np.inf]
+
 # Fit Fe in log-space
-popt_fe, pcov_fe = aux.curve_fit(log_vft_conc, x_fe,
-                                 logy_fe,p0=p0_fe,\
-                                 sigma=siglog_fe,\
+popt_fe, pcov_fe = aux.curve_fit(aux.log_vft_conc, x_fe,logy_fe,\
+                                 p0=p0_fe,sigma=siglog_fe,\
                                  absolute_sigma=True,\
                                  bounds=(lower_bounds, upper_bounds),\
                                  maxfev=20000)
@@ -120,7 +146,7 @@ perr_fe = np.sqrt(np.diag(pcov_fe))
 logD0_fe_err, B_fe_err, c0_fe_err = perr_fe
 
 # Fit F in log-space
-popt_f, pcov_f = aux.curve_fit(log_vft_conc, x_f, logy_f, p0=p0_f,\
+popt_f, pcov_f = aux.curve_fit(aux.log_vft_conc,x_f,logy_f,p0=p0_f,\
                                sigma=siglog_f,absolute_sigma=True,\
                                bounds=(lower_bounds, upper_bounds),
                                maxfev=20000)
@@ -140,8 +166,8 @@ D0_f_err  = D0_f  * logD0_f_err
 # Smooth curves
 xfit = np.linspace(np.min(x), np.max(x), 400)
 
-logfit_fe = log_vft_conc(xfit, *popt_fe)
-logfit_f  = log_vft_conc(xfit, *popt_f)
+logfit_fe = aux.log_vft_conc(xfit, *popt_fe)
+logfit_f  = aux.log_vft_conc(xfit, *popt_f)
 
 yfit_fe = np.exp(logfit_fe)
 yfit_f  = np.exp(logfit_f)
@@ -150,21 +176,22 @@ yfit_f  = np.exp(logfit_f)
 fig3,ax3 = plt.subplots()
 ax1.set_xlabel(r'Concentration (m)')
 ax1.set_ylabel(r'Diffusivity (m$^2$/s)')
-plt.style.use('seaborn-colorblind')
+if not system == 'cades':
+    plt.style.use('seaborn-colorblind')
 plt.tight_layout()
-
+print("Plotting Fe/TFSI diffusivities with VFT fits...")
 plt.errorbar(x, 0.0001*y_fe, yerr=0.0001*err_fe,marker='o',\
              color=clr_arr[0],markersize=8,capsize=4, \
              linestyle='none',label=r'Fe$^{3+}$')
 
 plt.errorbar(x, 0.0001*y_f, yerr=0.0001*err_f,marker='s',\
              color = clr_arr[1],markersize=8,capsize=4, \
-             linestyle='none',label='F (TFSI)')
+             linestyle='none',label='TFSI$^{-}$')
 
 plt.plot(xfit, yfit_fe,color=clr_arr[0],linestyle='--',\
-         label=r'VFT Fit - Fe$^{3+}$)')
+         linewidth = 2.5, label=r'VFT Fit - Fe$^{3+}$)')
 plt.plot(xfit, yfit_f,color=clr_arr[1],linestyle='--',\
-         label=r'VFT fit - F(TFSI))')
+         linewidth = 2.5, label=r'VFT Fit - TFSI$^{-}$')
 
 plt.yscale("log")
 plt.xlabel("Concentration (m)")
@@ -175,17 +202,31 @@ fig3.savefig(figdir + '/VFTfit_diff_all_Fe' + str(fecharge) +
              '_trial_' + str(trialnum) + '.png',dpi=fig3.dpi)
 
 
-
+print("Writing output to file..")
 # Write fitted parameters
 with open(f'{anadir}/D_fitted.dat','w') as fid:
-    fid.write("Fe log-space fit parameters:")
-    fid.write(f"log(D0) = {logD0_fe:.6f} Â± {logD0_fe_err:.6f}")
-    fid.write(f"D0      = {D0_fe:.6e} Â± {D0_fe_err:.6e}")
-    fid.write(f"B       = {B_fe:.6e} Â± {B_fe_err:.6e}")
-    fid.write(f"c0      = {c0_fe:.6f} Â± {c0_fe_err:.6f}")
+    fid.write("Fe log-space fit parameters: \n")
+    fid.write(f"log(D0) = {logD0_fe:.6f} ± {logD0_fe_err:.6f}\n")
+    fid.write(f"D0      = {D0_fe:.6e} ± {D0_fe_err:.6e}\n")
+    fid.write(f"B       = {B_fe:.6e} ± {B_fe_err:.6e}\n")
+    fid.write(f"c0      = {c0_fe:.6f} ± {c0_fe_err:.6f}\n")
     
     fid.write("\nF log-space fit parameters:")
-    fid.write(f"log(D0) = {logD0_f:.6f} Â± {logD0_f_err:.6f}")
-    fid.write(f"D0      = {D0_f:.6e} Â± {D0_f_err:.6e}")
-    fid.write(f"B       = {B_f:.6e} Â± {B_f_err:.6e}")
-    fid.write(f"c0      = {c0_f:.6f} Â± {c0_f_err:.6f}")
+    fid.write(f"log(D0) = {logD0_f:.6f} ± {logD0_f_err:.6f}\n")
+    fid.write(f"D0      = {D0_f:.6e} ± {D0_f_err:.6e}\n")
+    fid.write(f"B       = {B_f:.6e} ± {B_f_err:.6e}\n")
+    fid.write(f"c0      = {c0_f:.6f} ± {c0_f_err:.6f}\n")
+
+# Plot D_Fe/D_F
+fig4,ax4 = plt.subplots()
+rat_data = df['d_F/d_Fe']
+ax1.set_xlabel(r'Concentration (m)')
+ax1.set_ylabel(r'$D_\rm{TFSI^{-}}$/$D_\rm{Fe^{3+}}$')
+if not system == 'cades':
+    plt.style.use('seaborn-colorblind')
+plt.tight_layout()
+print("Plotting ratio of Fe/TFSI diffusivities")
+plt.plot(x, rat_data, marker='o',color=clr_arr[0],\
+         markersize=8,linestyle = '--',linewidth=2.5)
+fig4.savefig(figdir + '/rat_diff' + str(fecharge) +
+             '_trial_' + str(trialnum) + '.png',dpi=fig3.dpi)
