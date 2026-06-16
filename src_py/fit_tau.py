@@ -18,14 +18,19 @@ plt.rc('legend',fontsize=16) # fontsize of the legends
 plt.rcParams.update({'font.size': 14}) # other fonts
 plt.rcParams.update({'figure.autolayout': True})
 plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+plt.rcParams['font.serif'] = ['Arial'] + plt.rcParams['font.serif']
 
 # Inputs
 fecharge = 3
 trialnum = 5
 molality = ['0.1','0.2','0.4','1.0','2.5','5.0']
-headdir  = '../../FeTFSI/results_all_trial' + str(trialnum) 
-figdir   = '../../FeTFSI/figures/results_all_trial' + str(trialnum)
+
+# Directory details
+dirkey     = 'tau'
+dirsuffix  = 'results_all_trial'+str(trialnum)+'/fetfsi_'+str(fecharge)
+headdir    = '../../FeTFSI/' + dirsuffix
+resultdir  = headdir + '/' + dirkey + '_all'
+figdir     = '../../FeTFSI/figures/' + dirsuffix +'/' + dirkey + '_all'
 outheaddir = '../../FeTFSI/analyzed_results/results_all_trial' + \
     str(trialnum) + 'fetfsi_' + str(fecharge) + '/tau_results'
 
@@ -45,14 +50,14 @@ for inum,molval in enumerate(molality): # loop in runarr
         
     print(f"Analyzing {molval}")
     
-    anadir = headdir + '/ana_main_fetfsi' + str(fecharge) + '/mol_' + molval
+    anadir = resultdir + '/mol_' + molval
 
     if not os.path.isdir(anadir):
         warnings.warn(f'{anadir} does not exist')
         continue
             
     # Check file
-    list_fnames = glob.glob(anadir + '/Fsktcountion*small*')
+    list_fnames = glob.glob(anadir + '/Fsktion*small*')
     if list_fnames == []:
         warnings.warn(f'No Fskt small run files exist in {anadir}')
         continue
