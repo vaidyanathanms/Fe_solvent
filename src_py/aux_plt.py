@@ -243,29 +243,24 @@ def extract_fit_params(filename):
 
     data = {}
 
-    # Split into blocks: Fe block, F block, etc.
-    blocks = re.split(r"\n\s*\n", text.strip())
 
-    for block in blocks:
-        header_match = re.search(r"(\w+)\s+log-space fit parameters:", block)
-        if not header_match:
-            continue
+    block_pattern = re.compile(r"(\w+)\s+log-space fit parameters:\s*(.*?)(?=\n\s*\w+\s+log-space fit parameters:|\Z)",
+                               flags=re.IGNORECASE | re.DOTALL)
+    
+    num = r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
 
-        species = header_match.group(1)
+    # Value and error are separated by comma
+    line_pattern = re.compile(rf"([A-Za-z0-9_().]+)\s*=\s*({num})\s*,\s*({num})",
+                              flags=re.IGNORECASE)
+
+    for species, block in block_pattern.findall(text):
         data[species] = {}
 
-        # Match lines like:
-        # log(D0) = -3.747587 Â± 0.357335
-        # D0      = 2.357456e-02 Â± 8.424017e-03
-        pattern = r"([A-Za-z0-9()]+)\s*=\s*([+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s*Â±\s*([+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?)"
-        print(re.findall(pattern, block, flags=re.IGNORECASE))
-        for name, value, error in re.findall(pattern, block, flags=re.IGNORECASE):
-            print(name,value,error)
+        for name, value, error in line_pattern.findall(block):
             data[species][name] = {
                 "value": float(value),
                 "error": float(error)
             }
-            
     return data
 #-------------------------------------------------------------------------------
 
