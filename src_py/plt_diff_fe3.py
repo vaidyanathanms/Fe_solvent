@@ -105,7 +105,7 @@ plt.plot(xfit, yfit_f,color=clr_arr[1],linestyle='--',\
 plt.yscale("log")
 ax1.set_xlabel("Concentration (m)",fontsize=16)
 ax1.set_ylabel("Diffusivity (cm$^2$/s)",fontsize=16)
-ax1.legend()
+ax1.legend(loc = 'upper right')
 plt.tight_layout()
 fig1.savefig(figdir + '/VFTfit_diff_all_Fe' + str(fecharge) +
              '_trial_' + str(trialnum) + '.png',dpi=fig1.dpi)
