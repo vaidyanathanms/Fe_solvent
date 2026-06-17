@@ -79,11 +79,11 @@ for inum,molval in enumerate(molality): # loop in runarr
 
     for rtype in runtype:
 
-        print(f"Analyzing {rtype}")
+        print(f"Analyzing {rtype} for {molval}")
         
         for atype in iontype:
 
-            print(f"Analyzing {atype}")
+            print(f"Analyzing {atype} for {molval}")
             
             # Check file
             list_fnames = glob.glob(f'{anadir}/Fskt{atype}*{rtype}*')
@@ -94,9 +94,9 @@ for inum,molval in enumerate(molality): # loop in runarr
             # Initialize arrays
             q_arr    = np.array([])
             tau_arr  = np.array([]); tauavg_arr = np.array([])
-            beta_arr = np.array([]); c0_arr = np.array([])
+            beta_arr = np.array([]); 
             tauerr_arr  = np.array([])
-            betaerr_arr = np.array([]); c0err_arr = np.array([])
+            betaerr_arr = np.array([]); 
 
             # Set output file and output figure data
             fig1,ax1 = plt.subplots()
@@ -135,24 +135,21 @@ for inum,molval in enumerate(molality): # loop in runarr
                     q_arr    = np.append(q_arr,qval)
                     tau_arr  = np.append(tau_arr,np.nan)
                     beta_arr = np.append(beta_arr,np.nan)
-                    c0_arr   = np.append(c0_arr,np.nan)
                     tauerr_arr  = np.append(tauerr_arr,np.nan)
                     betaerr_arr = np.append(betaerr_arr,np.nan)
-                    c0err_arr   = np.append(c0err_arr,np.nan)
                     continue
 
                 # Fit initial guesses
-                c0 = fskt_data[-1]
                 tau0 = time_data[len(time_data)//5]
                 beta0 = 0.8
-                init_guess = [tau0,beta0,c0]
-                bounds = ([1e-10, 0.01, 0.0],
-                          [np.inf, 2.0, np.inf]) # same order as init_guess
+                init_guess = [tau0,beta0]
+                bounds = ([1e-10, 0.01],
+                          [np.inf, 1.0]) # same order as init_guess
 
                 # Fit
-                popt, pcov = aux.curve_fit(aux.stretched_exp,time_data,fskt_data,\
+                popt, pcov = curve_fit(aux.stretched_exp,time_data,fskt_data,\
                                            p0=init_guess,bounds=bounds,maxfev=100000)
-                tau_fit, beta_fit, c0_fit = popt
+                tau_fit, beta_fit,  = popt
                 tau_avg = tau_fit * math.gamma(1.0 + 1.0/beta_fit)
                 perr = np.sqrt(np.diag(pcov))
                 
@@ -160,11 +157,9 @@ for inum,molval in enumerate(molality): # loop in runarr
                 q_arr      = np.append(q_arr,qval)
                 tau_arr    = np.append(tau_arr,tau_fit)
                 beta_arr   = np.append(beta_arr,beta_fit)
-                c0_arr     = np.append(c0_arr,c0_fit)
-                tauavg_arr = np.append(c0_arr,tau_avg)
+                tauavg_arr = np.append(tauavg_arr,tau_avg)
                 tauerr_arr  = np.append(tauerr_arr,perr[0])
                 betaerr_arr = np.append(betaerr_arr,perr[1])
-                c0err_arr   = np.append(c0err_arr,perr[0])
                 
                 # Plot data
                 ax1.plot(time_data,fskt_data,"o",markersize=2,\
@@ -175,16 +170,16 @@ for inum,molval in enumerate(molality): # loop in runarr
                          color=clr_arr[inum],label=str(molval) + ' m')
 
         
-                # Save output file
-                combined_data = np.column_stack((q_arr,tau_arr,beta_arr,c0_arr,\
-                                                 tauerr_arr,betaerr_arr,c0err_arr))
-    
-                np.savetxt(f'{outdir}/tau{atype}_{rtype}_mol_{molval}.dat',\
-                           combined_data,delimiter='\t',\
-                           header='q\ttau\tbeta\tc0\ttau_avg\ttau_err\tbeta_err\tc0_err')
+            # Save output file
+            combined_data = np.column_stack((q_arr,tau_arr,beta_arr,\
+                                             tauerr_arr,betaerr_arr))
+            
+            np.savetxt(f'{outdir}/tau{atype}_{rtype}_mol_{molval}.dat',\
+                       combined_data,delimiter='\t',\
+                       header='q\ttau\tbeta\ttau_avg\ttau_err\tbeta_err\n')
                 
             plt.legend(loc=0)
             plt.tight_layout()
             fig1.savefig(f'{figdir}/tau{atype}_{rtype}_mol_{molval}.png',\
                          dpi=fig1.dpi)
-
+            plt.close(fig1)
