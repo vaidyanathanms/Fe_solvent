@@ -92,8 +92,8 @@ def compress_repeated_y(x, y, tolerance=0.0, method="middle"):
 # Stretched exponential function
 # Fs(k,t)/Fs(k,0) = exp[-(t/tau)^beta] + C
 # Use only normalized values
-def stretched_exp(t, tau, beta, C):
-    return np.exp(- (t / tau)**beta) + C
+def stretched_exp(t, tau, beta):
+    return np.exp(- (t / tau)**beta)
 #-------------------------------------------------------------------------------
 
 # Truncate data at the first point where Fskt goes below 0
