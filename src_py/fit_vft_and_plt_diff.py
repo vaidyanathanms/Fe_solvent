@@ -9,12 +9,10 @@ import pandas as pd
 import os
 import warnings
 import aux_plt as aux
-import seaborn as sns
 
 system   = 'cades' #cades or lap
 
 # Color/line data; figure defaults
-sns.set_palette("colorblind")
 orange = '#FFA500'; dark_g = '#006400'; brown = '#8B4513'
 clr_arr = [dark_g,orange,brown,'b','k','m']
 mrk_arr = ['o','d','s']
@@ -71,7 +69,6 @@ if not os.path.isdir(figdir):
 fig1,ax1 = plt.subplots()
 ax1.set_xlabel(r'Concentration (m)',fontsize=16)
 ax1.set_ylabel(r'Diffusivity (m$^2$/s)',fontsize=16)
-plt.style.use('seaborn-colorblind')
 plt.tight_layout()
 print("Plotting Fe/TFSI diffusivities ...")
 plt.errorbar(x, 0.0001*y_fe, yerr=0.0001*err_fe,color=clr_arr[0],\
@@ -89,7 +86,6 @@ fig1.savefig(figdir + '/diff_all_Fe' + str(fecharge) +
 fig2,ax2 = plt.subplots()
 ax2.set_xlabel(r'Concentration (m)',fontsize=16)
 ax2.set_ylabel(r'Diffusivity (m$^2$/s)',fontsize=16)
-plt.style.use('seaborn-colorblind')
 plt.tight_layout()
 print("Plotting Fe/TFSI diffusivities in semilog scale...")
 plt.errorbar(x, 0.0001*y_fe, yerr=0.0001*err_fe,marker='o',\
@@ -181,7 +177,6 @@ yfit_f  = np.exp(logfit_f)
 
 # Plot
 fig3,ax3 = plt.subplots()
-plt.style.use('seaborn-colorblind')
 plt.tight_layout()
 print("Plotting Fe/TFSI diffusivities with VFT fits...")
 plt.errorbar(x, y_fe, yerr=err_fe,marker='o',\
@@ -215,7 +210,7 @@ with open(f'{anadir}/D_fitted.dat','w') as fid:
     fid.write(f"B       = {B_fe:.6e} ± {B_fe_err:.6e}\n")
     fid.write(f"c0      = {c0_fe:.6f} ± {c0_fe_err:.6f}\n")
     
-    fid.write("\nF log-space fit parameters:")
+    fid.write("\nF log-space fit parameters: \n")
     fid.write(f"log(D0) = {logD0_f:.6f} ± {logD0_f_err:.6f}\n")
     fid.write(f"D0      = {D0_f:.6e} ± {D0_f_err:.6e}\n")
     fid.write(f"B       = {B_f:.6e} ± {B_f_err:.6e}\n")
@@ -226,7 +221,6 @@ fig4,ax4 = plt.subplots()
 rat_data = df['d_TFSICOM/d_Fe']
 ax4.set_xlabel(r'Concentration (m)',fontsize=16)
 ax4.set_ylabel(r'$D_{\rm{TFSI}^{-}}$/$D_{\rm{Fe}^{3+}}$',fontsize=16)
-plt.style.use('seaborn-colorblind')
 plt.tight_layout()
 print("Plotting ratio of Fe/TFSI diffusivities")
 plt.plot(x, rat_data, marker='o',color=clr_arr[0],\
