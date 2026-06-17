@@ -9,6 +9,7 @@ import pandas as pd
 import os
 import warnings
 import aux_plt as aux
+from scipy.optimize import curve_fit
 
 system   = 'cades' #cades or lap
 
@@ -138,21 +139,21 @@ lower_bounds = [-np.inf, 0.0, xmax + 1e-6]
 upper_bounds = [ np.inf, np.inf, np.inf]
 
 # Fit Fe in log-space
-popt_fe, pcov_fe = aux.curve_fit(aux.log_vft_conc, x_fe,logy_fe,\
-                                 p0=p0_fe,sigma=siglog_fe,\
-                                 absolute_sigma=True,\
-                                 bounds=(lower_bounds, upper_bounds),\
-                                 maxfev=20000)
+popt_fe, pcov_fe = curve_fit(aux.log_vft_conc, x_fe,logy_fe,\
+                             p0=p0_fe,sigma=siglog_fe,\
+                             absolute_sigma=True,\
+                             bounds=(lower_bounds, upper_bounds),\
+                             maxfev=20000)
 
 logD0_fe, B_fe, c0_fe = popt_fe
 perr_fe = np.sqrt(np.diag(pcov_fe))
 logD0_fe_err, B_fe_err, c0_fe_err = perr_fe
 
 # Fit F in log-space
-popt_f, pcov_f = aux.curve_fit(aux.log_vft_conc,x_tfsi,logy_tfsi,p0=p0_f,\
-                               sigma=siglog_f,absolute_sigma=True,\
-                               bounds=(lower_bounds, upper_bounds),
-                               maxfev=20000)
+popt_f, pcov_f = curve_fit(aux.log_vft_conc,x_tfsi,logy_tfsi,p0=p0_f,\
+                           sigma=siglog_f,absolute_sigma=True,\
+                           bounds=(lower_bounds, upper_bounds),
+                           maxfev=20000)
 
 logD0_f, B_f, c0_f = popt_f
 perr_tfsi = np.sqrt(np.diag(pcov_f))
@@ -205,16 +206,16 @@ print("Writing output to file..")
 # Write fitted parameters
 with open(f'{anadir}/D_fitted.dat','w') as fid:
     fid.write("Fe log-space fit parameters: \n")
-    fid.write(f"log(D0) = {logD0_fe:.6f} ± {logD0_fe_err:.6f}\n")
-    fid.write(f"D0      = {D0_fe:.6e} ± {D0_fe_err:.6e}\n")
-    fid.write(f"B       = {B_fe:.6e} ± {B_fe_err:.6e}\n")
-    fid.write(f"c0      = {c0_fe:.6f} ± {c0_fe_err:.6f}\n")
+    fid.write(f"log(D0) = {logD0_fe:.6f}, {logD0_fe_err:.6f}\n")
+    fid.write(f"D0      = {D0_fe:.6e}, {D0_fe_err:.6e}\n")
+    fid.write(f"B       = {B_fe:.6e}, {B_fe_err:.6e}\n")
+    fid.write(f"c0      = {c0_fe:.6f}, {c0_fe_err:.6f}\n")
     
     fid.write("\nF log-space fit parameters: \n")
-    fid.write(f"log(D0) = {logD0_f:.6f} ± {logD0_f_err:.6f}\n")
-    fid.write(f"D0      = {D0_f:.6e} ± {D0_f_err:.6e}\n")
-    fid.write(f"B       = {B_f:.6e} ± {B_f_err:.6e}\n")
-    fid.write(f"c0      = {c0_f:.6f} ± {c0_f_err:.6f}\n")
+    fid.write(f"log(D0) = {logD0_f:.6f}, {logD0_f_err:.6f}\n")
+    fid.write(f"D0      = {D0_f:.6e}, {D0_f_err:.6e}\n")
+    fid.write(f"B       = {B_f:.6e}, {B_f_err:.6e}\n")
+    fid.write(f"c0      = {c0_f:.6f}, {c0_f_err:.6f}\n")
 
 # Plot D_Fe/D_F
 fig4,ax4 = plt.subplots()
