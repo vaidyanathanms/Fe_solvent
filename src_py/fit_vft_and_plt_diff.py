@@ -1,5 +1,8 @@
 # Plots diffusivity for different concentration
-# Fits VFT 
+# Fits VFT
+# Use this to fit in CADES and plot in laptop for consistency in plot
+# outputs
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -128,7 +131,7 @@ eps = 1e-30
 siglog_fe = np.where(err_fe > 0, err_fe / np.maximum(y_fe, eps), 1.0)
 siglog_f  = np.where(err_tfsi  > 0, err_tfsi  / np.maximum(y_tfsi,  eps), 1.0)
 
-xmax = np.max(x)
+xmax = np.max(x_fe)
 
 # Initial guesses
 p0_fe = [np.log(np.max(y_fe)), 1.0, xmax + 1.0]
@@ -168,7 +171,7 @@ D0_fe_err = D0_fe * logD0_fe_err
 D0_f_err  = D0_f  * logD0_f_err
 
 # Smooth curves
-xfit = np.linspace(np.min(x), np.max(x), 400)
+xfit = np.linspace(np.min(x_fe), np.max(x_fe), 400)
 
 logfit_fe = aux.log_vft_conc(xfit, *popt_fe)
 logfit_f  = aux.log_vft_conc(xfit, *popt_f)
