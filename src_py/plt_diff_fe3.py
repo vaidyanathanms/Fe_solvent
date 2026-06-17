@@ -16,7 +16,7 @@ plt.rc('legend',fontsize=16) # fontsize of the legends
 plt.rcParams.update({'font.size': 14}) # other fonts
 plt.rcParams.update({'figure.autolayout': True})
 plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+plt.rcParams['font.serif'] = ['Arial'] + plt.rcParams['font.serif']
 
 # Inputs
 fecharge = 3
