@@ -3,6 +3,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import math
+import os
+import aux_plt as aux
 
 # Color/line data; figure defaults
 orange = '#FFA500'; dark_g = '#006400'; brown = '#8B4513'
@@ -21,18 +24,12 @@ trialnum = 5
 dirkey   = 'diffusivity'
 
 # Directory/file details
-if system == 'cades':
-    dirsuffix  = '/lustre/or-scratch/cades-birthright/vm5/fetfsi/fetfsi_3/trial_5/results_all'
-    anadir     =  dirsuffix + '/dens_diff_all'
-    figdir     =  dirsuffix + '/figs_all'
-else:
-    dirsuffix  = 'results_all_trial'+str(trialnum)
-    anadir     = '../../FeTFSI/analyzed_results/' +  dirsuffix + '/density_all'
-    figdir     = '../../FeTFSI/figures/' + dirsuffix +'/fetfsi_'+str(fecharge) +'/' + dirkey + '_all'
+dirkey     = 'dens_diff'
+dirsuffix  = 'results_all_trial'+str(trialnum) + '/fetfsi_' + str(fecharge)
+anadir     = '../../FeTFSI/analyzed_results/' +  dirsuffix + '/' + dirkey + '_all'
+figdir     = '../../FeTFSI/figures/' + dirsuffix  +'/' + dirkey + '_all'
 
 inpfile = f'{anadir}/dens_and_diff.xlsx'
-
-
 
 if not os.path.isdir(anadir):
     raise RuntimeError(f'analysis directory: {anadir} not found')
@@ -76,8 +73,16 @@ ax1.set_ylabel(r'Diffusivity (m$^2$/s)',fontsize=16)
 plt.style.use('seaborn-colorblind')
 plt.tight_layout()
 
+fitfile = f'{anadir}/D_fitted.dat'
+if not os.path.exists(fitfile):
+    raise RuntimError(f'{fitfile} not found in {anadir}')
 xfit = np.linspace(np.min(x_fe), np.max(x_fe), 400)
 
+fit_data  = aux.extract_fit_params(fitfile)
+print(fit_data)
+popt_fe   = [math.log(fit_data["Fe"]["D0"]["value"]),fit_data["Fe"]["B"]["value"],fit_data["Fe"]["c0"]["value"]]
+popt_f    = [fit_data["F"]["log(D0)"]["value"],fit_data["F"]["B"]["value"],fit_data["F"]["c0"]["value"]]
+    
 logfit_fe = aux.log_vft_conc(xfit, *popt_fe)
 logfit_f  = aux.log_vft_conc(xfit, *popt_f)
 
@@ -106,9 +111,7 @@ fig3.savefig(figdir + '/VFTfit_diff_all_Fe' + str(fecharge) +
              '_trial_' + str(trialnum) + '.png',dpi=fig3.dpi)
 
 
-
-
-
+#-------------------------------------------------------------------------------
 # Plot D_Fe/D_F
 fig4,ax4 = plt.subplots()
 rat_data = df['d_TFSICOM/d_Fe']

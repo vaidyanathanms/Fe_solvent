@@ -7,7 +7,7 @@ import csv
 import glob
 import warnings
 from pathlib import Path
-from scipy.optimize import curve_fit
+import re
 
 # General copy script
 def gencpy(dum_maindir,dum_destdir,fylname):
@@ -237,7 +237,39 @@ def log_vft_conc(c, logD0, B, c0):
     return logD0 - (B / (c0 - c))
 #-------------------------------------------------------------------------------
 
-# if __name__
+def extract_fit_params(filename):
+    with open(filename, "r") as f:
+        text = f.read()
+
+    data = {}
+
+    # Split into blocks: Fe block, F block, etc.
+    blocks = re.split(r"\n\s*\n", text.strip())
+
+    for block in blocks:
+        header_match = re.search(r"(\w+)\s+log-space fit parameters:", block)
+        if not header_match:
+            continue
+
+        species = header_match.group(1)
+        data[species] = {}
+
+        # Match lines like:
+        # log(D0) = -3.747587 Â± 0.357335
+        # D0      = 2.357456e-02 Â± 8.424017e-03
+        pattern = r"([A-Za-z0-9()]+)\s*=\s*([+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s*Â±\s*([+-]?\d+(?:\.\d+)?(?:e[+-]?\d+)?)"
+        print(re.findall(pattern, block, flags=re.IGNORECASE))
+        for name, value, error in re.findall(pattern, block, flags=re.IGNORECASE):
+            print(name,value,error)
+            data[species][name] = {
+                "value": float(value),
+                "error": float(error)
+            }
+            
+    return data
+#-------------------------------------------------------------------------------
+
+#if __name__
 if __name__ == '__main__':
     main()
 #-------------------------------------------------------------------------------
