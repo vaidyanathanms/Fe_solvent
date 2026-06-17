@@ -224,7 +224,7 @@ ax4.set_xlabel(r'Concentration (m)',fontsize=16)
 ax4.set_ylabel(r'$D_{\rm{TFSI}^{-}}$/$D_{\rm{Fe}^{3+}}$',fontsize=16)
 plt.tight_layout()
 print("Plotting ratio of Fe/TFSI diffusivities")
-plt.plot(x, rat_data, marker='o',color=clr_arr[0],\
+plt.plot(x_fe, rat_data, marker='o',color=clr_arr[0],\
          markersize=8,linestyle = '--',linewidth=2.5)
 fig4.savefig(figdir + '/rat_diff' + str(fecharge) +
              '_trial_' + str(trialnum) + '.png',dpi=fig3.dpi)
