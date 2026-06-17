@@ -79,8 +79,8 @@ if not os.path.exists(fitfile):
 xfit = np.linspace(np.min(x_fe), np.max(x_fe), 400)
 
 fit_data  = aux.extract_fit_params(fitfile)
-print(fit_data)
-popt_fe   = [math.log(fit_data["Fe"]["D0"]["value"]),fit_data["Fe"]["B"]["value"],fit_data["Fe"]["c0"]["value"]]
+
+popt_fe   = [fit_data["Fe"]["log(D0)"]["value"],fit_data["Fe"]["B"]["value"],fit_data["Fe"]["c0"]["value"]]
 popt_f    = [fit_data["F"]["log(D0)"]["value"],fit_data["F"]["B"]["value"],fit_data["F"]["c0"]["value"]]
     
 logfit_fe = aux.log_vft_conc(xfit, *popt_fe)
@@ -107,20 +107,20 @@ ax1.set_xlabel("Concentration (m)",fontsize=16)
 ax1.set_ylabel("Diffusivity (cm$^2$/s)",fontsize=16)
 ax1.legend()
 plt.tight_layout()
-fig3.savefig(figdir + '/VFTfit_diff_all_Fe' + str(fecharge) +
-             '_trial_' + str(trialnum) + '.png',dpi=fig3.dpi)
+fig1.savefig(figdir + '/VFTfit_diff_all_Fe' + str(fecharge) +
+             '_trial_' + str(trialnum) + '.png',dpi=fig1.dpi)
 
 
 #-------------------------------------------------------------------------------
 # Plot D_Fe/D_F
-fig4,ax4 = plt.subplots()
-rat_data = df['d_TFSICOM/d_Fe']
-ax4.set_xlabel(r'Concentration (m)',fontsize=16)
-ax4.set_ylabel(r'$D_{\rm{TFSI}^{-}}$/$D_{\rm{Fe}^{3+}}$',fontsize=16)
+fig2,ax2 = plt.subplots()
+rat_data = df['d_TFSICOM/d_Fe'].to_numpy()
+ax2.set_xlabel(r'Concentration (m)',fontsize=16)
+ax2.set_ylabel(r'$D_{\rm{TFSI}^{-}}$/$D_{\rm{Fe}^{3+}}$',fontsize=16)
 plt.style.use('seaborn-colorblind')
 plt.tight_layout()
 print("Plotting ratio of Fe/TFSI diffusivities")
-plt.plot(x, rat_data, marker='o',color=clr_arr[0],\
+plt.plot(x_fe.to_numpy(), rat_data, marker='o',color=clr_arr[0],\
          markersize=8,linestyle = '--',linewidth=2.5)
-fig4.savefig(figdir + '/rat_diff' + str(fecharge) +
-             '_trial_' + str(trialnum) + '.png',dpi=fig3.dpi)
+fig2.savefig(figdir + '/rat_diff' + str(fecharge) +
+             '_trial_' + str(trialnum) + '.png',dpi=fig2.dpi)
