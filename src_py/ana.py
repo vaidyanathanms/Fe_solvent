@@ -16,18 +16,18 @@ from my_python_functions import edit_generate_anainp_files
 from my_python_functions import run_analysis
 
 #---------input details----------------------------------------
-valency_fe   = '3' # 2 or 3 as string
+valency_fe   = '2' # 2 or 3 as string
 trial_num    = '5' # trial number in the directory as string
 analyze_only = 'all' #latest, all, filename, filelist
 mol_fetfsi   = ['0.1','0.2','0.4','1.0']#,'2.5','5.0']# mol fraction of fetfsi
 nframes      = 2000 # total frames to be analyzed
 skipfr       = 100 # skip frames
 start_time   = 52000 # for gromacs
-freqfr       = 1 # freq of anaylsis
+freqfr       = 2 # freq of anaylsis
 runana       = 1 # 1 - run analysis
 
 #---------job details------------------------------------------
-tottime   = 18 # in hours
+tottime   = 36 # in hours
 nnodes    = 1 # number of nodes
 ncores    = 8 # number of cores
 hpc_sys   = 'cades'  # Opt: kestrel, cades

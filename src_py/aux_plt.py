@@ -233,11 +233,9 @@ def read_xvg_filedata(fname):
 # VFT-like model in concentration
 # D(c) = D0 * exp[-B / (c0 - c)]
 # log(D) = log(D0) - B / (c0 - c)
-# We fit log(D) directly
-def log_vft_conc(c, log10D0, B, c0):
-    return log10D0 - (B / (c0 - c)) / np.log(10)
+def log_vft_conc(c, logD0, B, c0):
+    return logD0 - (B / (c0 - c))
 #-------------------------------------------------------------------------------
-
 
 # if __name__
 if __name__ == '__main__':
