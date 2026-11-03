@@ -175,7 +175,6 @@ for inum,molval in enumerate(molality): # loop in runarr
 
         
             # Save output file
-            print(tauavg_arr)
             combined_data = np.column_stack((q_arr,tau_arr,beta_arr,\
                                              tauavg_arr,tauerr_arr,betaerr_arr))
             
