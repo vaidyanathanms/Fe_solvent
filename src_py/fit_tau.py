@@ -16,7 +16,7 @@ system = 'cades' # cades or lap
 # Color/line data; figure defaults
 sns.set_palette("colorblind")
 orange = '#FFA500'; dark_g = '#006400'; brown = '#8B4513'
-clr_arr = [dark_g,orange,brown,'b','k','m']
+clr_arr = [dark_g,orange,brown,'b','k','m','r','y']
 mrk_arr = ['o','d','s']
 lne_arr = ['-','--']
 plt.rc('legend',fontsize=16) # fontsize of the legends
@@ -34,7 +34,7 @@ iontype  = ['ion','countion']
 
 # Directory/file details
 if system == 'cades':
-    dirsuffix  = '/lustre/or-scratch/cades-birthright/vm5/fetfsi/fetfsi_3/trial_5'
+    dirsuffix  = '/lustre/or-scratch24/scratch/vm5/fetfsi/fetfsi_3/trial_5'
     resultdir  =  dirsuffix + '/results_all'
     figdir     =  dirsuffix + '/results_all/figtau_all'
     outheaddir =  dirsuffix + '/results_all/tau_results'
@@ -100,13 +100,13 @@ for inum,molval in enumerate(molality): # loop in runarr
 
             # Set output file and output figure data
             fig1,ax1 = plt.subplots()
-            ax1.set_xlabel(r'$q$ (nm$^{-1}$)')
-            ax1.set_ylabel(r'$F$_s$(q,t)$')
+            ax1.set_xlabel(r'Time (ps)')
+            ax1.set_ylabel(r'$F_s$ ($q,t$)')
             #plt.style.use('seaborn-colorblind')
             plt.tight_layout()
     
             # Loop through the files
-            for fname in list_fnames:
+            for qid,fname in enumerate(list_fnames):
                 # Get qval
                 qval = float(Path(fname).name.split('_')[1])
                 # Open and parse file
@@ -124,6 +124,7 @@ for inum,molval in enumerate(molality): # loop in runarr
                                                                    method="middle")
 
         
+                time_smooth -= time_smooth[0]
                 fskt_smooth /= fskt_smooth[0]
         
                 # Truncate to the first negative value
@@ -135,6 +136,7 @@ for inum,molval in enumerate(molality): # loop in runarr
                     q_arr    = np.append(q_arr,qval)
                     tau_arr  = np.append(tau_arr,np.nan)
                     beta_arr = np.append(beta_arr,np.nan)
+                    tauavg_arr  = np.append(tauerr_arr,np.nan)
                     tauerr_arr  = np.append(tauerr_arr,np.nan)
                     betaerr_arr = np.append(betaerr_arr,np.nan)
                     continue
@@ -160,25 +162,31 @@ for inum,molval in enumerate(molality): # loop in runarr
                 tauavg_arr = np.append(tauavg_arr,tau_avg)
                 tauerr_arr  = np.append(tauerr_arr,perr[0])
                 betaerr_arr = np.append(betaerr_arr,perr[1])
+
+                
                 
                 # Plot data
-                ax1.plot(time_data,fskt_data,"o",markersize=2,\
-                         color=clr_arr[inum],label='_data')
+                ax1.plot(time_data,fskt_data,"o",markersize=5,\
+                         color=clr_arr[qid],label='_data')
                 tfit = np.linspace(time_data.min(),time_data.max(), 1000)
                 yfit = aux.stretched_exp(tfit, *popt)
                 ax1.plot(tfit,yfit,"-",linewidth=2,\
-                         color=clr_arr[inum],label=str(molval) + ' m')
+                         color=clr_arr[qid],label=rf'$q$ = {qval} $\AA$ $^{{-1}}$')
 
         
             # Save output file
+            print(tauavg_arr)
             combined_data = np.column_stack((q_arr,tau_arr,beta_arr,\
-                                             tauerr_arr,betaerr_arr))
+                                             tauavg_arr,tauerr_arr,betaerr_arr))
             
             np.savetxt(f'{outdir}/tau{atype}_{rtype}_mol_{molval}.dat',\
                        combined_data,delimiter='\t',\
                        header='q\ttau\tbeta\ttau_avg\ttau_err\tbeta_err\n')
                 
             plt.legend(loc=0)
+            ax1.set_xscale('log')
+            ax1.set_yscale('log')
+            ax1.set_ylim(bottom = 0.01)
             plt.tight_layout()
             fig1.savefig(f'{figdir}/tau{atype}_{rtype}_mol_{molval}.png',\
                          dpi=fig1.dpi)
