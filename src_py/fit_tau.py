@@ -16,7 +16,7 @@ system = 'cades' # cades or lap
 # Color/line data; figure defaults
 sns.set_palette("colorblind")
 orange = '#FFA500'; dark_g = '#006400'; brown = '#8B4513'
-clr_arr = [dark_g,orange,brown,'b','k','m','r','y']
+clr_arr = sns.color_palette("husl", 100)
 mrk_arr = ['o','d','s']
 lne_arr = ['-','--']
 plt.rc('legend',fontsize=16) # fontsize of the legends
@@ -29,8 +29,10 @@ plt.rcParams['font.serif'] = ['Arial'] + plt.rcParams['font.serif']
 fecharge = 3
 trialnum = 5
 molality = ['0.1','0.2','0.4','1.0','2.5','5.0']
-runtype  = ['smallrun','main']
+runtype  = ['verysmallrun','smallrun','main']
 iontype  = ['ion','countion']
+qmax_val = [12.0,12.0,12.0] # max qval to look for each runtype
+qmin_val = [5.0,2.5,2.5]
 
 # Directory/file details
 if system == 'cades':
@@ -71,13 +73,14 @@ for inum,molval in enumerate(molality): # loop in runarr
 
     print(f"Analyzing {molval}")
     
-    anadir = resultdir + '/ana_mol_' + molval
-
+    #anadir = resultdir + '/ana_mol_' + molval #Old data
+    anadir = resultdir + '/fskt_all_Fe3_' + molval
+    
     if not os.path.isdir(anadir):
         warnings.warn(f'{anadir} does not exist')
         continue
 
-    for rtype in runtype:
+    for rtypeid,rtype in enumerate(runtype):
 
         print(f"Analyzing {rtype} for {molval}")
         
@@ -104,11 +107,16 @@ for inum,molval in enumerate(molality): # loop in runarr
             ax1.set_ylabel(r'$F_s$ ($q,t$)')
             #plt.style.use('seaborn-colorblind')
             plt.tight_layout()
-    
+            cqid = 1
+            
             # Loop through the files
             for qid,fname in enumerate(list_fnames):
                 # Get qval
                 qval = float(Path(fname).name.split('_')[1])
+                if qval < qmin_val[rtypeid] or qval > qmax_val[rtypeid]:
+                    continue
+                if os.path.getsize(fname) <= 100:
+                    continue
                 # Open and parse file
                 with open(fname) as fin:
                     lines = (line.lstrip() for line in fin \
@@ -117,7 +125,7 @@ for inum,molval in enumerate(molality): # loop in runarr
                     data  = np.loadtxt(lines,skiprows=1)
                     tdata = data[:,0]
                     fskt  = data[:,1]
-        
+
                 # Smooth to avoid repeated values
                 time_smooth, fskt_smooth = aux.compress_repeated_y(tdata,fskt,\
                                                                    tolerance=0.0,\
@@ -142,7 +150,7 @@ for inum,molval in enumerate(molality): # loop in runarr
                     continue
 
                 # Fit initial guesses
-                tau0 = time_data[len(time_data)//5]
+                tau0 = 100*float(molval)/qval #time_data[len(time_data)//5]
                 beta0 = 0.8
                 init_guess = [tau0,beta0]
                 bounds = ([1e-10, 0.01],
@@ -166,13 +174,14 @@ for inum,molval in enumerate(molality): # loop in runarr
                 
                 
                 # Plot data
-                ax1.plot(time_data,fskt_data,"o",markersize=5,\
-                         color=clr_arr[qid],label='_data')
                 tfit = np.linspace(time_data.min(),time_data.max(), 1000)
                 yfit = aux.stretched_exp(tfit, *popt)
-                ax1.plot(tfit,yfit,"-",linewidth=2,\
-                         color=clr_arr[qid],label=rf'$q$ = {qval} $\AA$ $^{{-1}}$')
-
+                if cqid//3 == 0:
+                    ax1.plot(time_data,fskt_data,"o",markersize=5,\
+                             color=clr_arr[cqid],label='_data')
+                    ax1.plot(tfit,yfit,"-",linewidth=2,\
+                             color=clr_arr[cqid],label=rf'$q$ = {qval} $\AA$ $^{{-1}}$')
+                    cqid += 1
         
             # Save output file
             combined_data = np.column_stack((q_arr,tau_arr,beta_arr,\
