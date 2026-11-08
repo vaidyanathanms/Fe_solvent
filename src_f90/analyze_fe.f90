@@ -363,9 +363,9 @@ SUBROUTINE READ_DATAFILE()
         
      READ(inpread,'(i5,2a5,i5,3f8.3,3f8.4)') molid,molname,aname&
           &,aid,rx,ry,rz
-
+ 
      IF (j .GT. 99999) aid = aid + 100000
-           
+     
      CALL MAP_ANAME_TO_ATYPE(aname,atype,k,0)
      
      aidvals(j,1)     = j
@@ -979,19 +979,19 @@ SUBROUTINE ANALYZE_TRAJECTORYFILE()
              &,aid, rx, ry, rz
 
         IF (at_cnt .GT. 99999) aid = aid + 100000
-           
+        
         rxyz_gmx(aid,1) = rx
         rxyz_gmx(aid,2) = ry
         rxyz_gmx(aid,3) = rz
         
         CALL MAP_ANAME_TO_ATYPE(aname,atype,kdummy,act_time)
-
+        
         IF(atype .NE. aidvals(aid,3)) THEN
-
+           
            PRINT *, "Incorrect atom ids"
            PRINT *, timestep, act_time
-           PRINT *, at_cnt,trim(adjustl(aname)),atype,aid,molid&
-                &,aidvals(aid,3)
+           PRINT *, at_cnt,trim(adjustl(aname)),atype,molid,aidvals(aid&
+                &,3)
            STOP
            
         END IF
@@ -3330,18 +3330,21 @@ SUBROUTINE DYNAMIC_SELF_ION_FSKT()
   
   Fskt = 0.0
 
-!$OMP PARALLEL DO PRIVATE(tinc,ifin,fx0,fy0,fz0,i,accum,tim,qinc,&
+  ! Reference box dimensions for the NPT trajectory
+  fx0 = pi2val / (sum(boxx_arr)/real(nframes))
+  fy0 = pi2val / (sum(boxy_arr)/real(nframes))
+  fz0 = pi2val / (sum(boxz_arr)/real(nframes))
+  
+  
+!$OMP PARALLEL DO PRIVATE(tinc,ifin,i,accum,tim,qinc,&
 !$OMP& qx,qy,qz,j,dx,dy,dz,qdotr,sum_cos) REDUCTION(+:Fskt)
   DO tinc = 0, nframes-1
      
      ifin = nframes - tinc  
-     fx0 = pi2val/boxx_arr(tinc+1)
-     fy0 = pi2val/boxy_arr(tinc+1)
-     fz0 = pi2val/boxz_arr(tinc+1)
-
+     accum = 0.0
+     
      DO i = 1,ifin
 
-        accum = 0.0
         tim = i + tinc
         
         DO qinc = 1, q_possN
@@ -3376,7 +3379,7 @@ SUBROUTINE DYNAMIC_SELF_ION_FSKT()
 
   DO i = 0,nframes-1
 
-     WRITE(dumwrite,"(2(F14.5,1X))") tarr_gmx(i+1), Fskt(i)
+     WRITE(dumwrite,"(2(F14.8,1X))") tarr_gmx(i+1), Fskt(i)
 
   END DO
 
