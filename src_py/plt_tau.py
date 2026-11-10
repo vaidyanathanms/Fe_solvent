@@ -27,7 +27,7 @@ plt.rcParams['font.serif'] = ['Arial'] + plt.rcParams['font.serif']
 # Inputs
 fecharge = 3
 trialnum = 5
-molality = ['0.1','0.2','0.4','1.0','2.5']
+molality = ['0.1','0.2','0.4','1.0','2.5','5.0']
 iontype  = ['ion']
 
 # Directory details
@@ -49,16 +49,18 @@ if not os.path.isdir(anadir):
 fig1,ax1 = plt.subplots()
 ax1.set_xlabel(r'$q$ ($\AA^{-1}$)',fontsize=16)
 ax1.set_ylabel(r'$\tau_{c}$ (ps)',fontsize=16)
+ax1.set_xlim(2,7)
 plt.style.use('seaborn-colorblind')
 plt.tight_layout()
 
 fig2,ax2 = plt.subplots()
 ax2.set_xlabel(r'$q$ ($\AA^{-1}$)',fontsize=16)
 ax2.set_ylabel(r'$\beta$',fontsize=16)
+ax1.set_xlim(2,7)
 plt.style.use('seaborn-colorblind')
 plt.tight_layout()
 
-
+maxref = 0
 # Load data
 for atype in iontype:
     
@@ -92,6 +94,8 @@ for atype in iontype:
         tau_avg = tau_avg[mask]
         tau_err = tau_err[mask]
 
+        if max(tau_avg) > maxref:
+            maxref = max(tau_avg)
         ax1.errorbar(qval,tau_avg,yerr=tau_err,marker=mrk_arr[inum],\
                     markersize=6,linestyle='None',capsize=4,\
                     color=clr_arr[inum],label=f'{molality[inum]} m')
@@ -101,9 +105,11 @@ for atype in iontype:
                  color=clr_arr[inum],label=f'{molality[inum]} m')
 
 
-ax1.legend(loc = 'lower left')
 ax2.legend()
+ax1.set_xlim([2,7])
 ax1.set_yscale('log')
+ax1.set_ylim(ymax=2*maxref)
+ax1.legend(loc = 'upper right')
 # Set output file and output figure data
 fig1.savefig(f'{figdir}/tau_{atype}_{rtype}.png',dpi=fig1.dpi)
 fig2.savefig(f'{figdir}/beta_{atype}_{rtype}.png',dpi=fig2.dpi)
