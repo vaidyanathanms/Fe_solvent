@@ -24,6 +24,9 @@ Author: Vaidyanathan M. Sethuraman
 * **Email:** [mathamangal1@ornl.gov](mailto:mathamangal1@ornl.gov)
 * **Email:** [msvaidyanathan1729[at]gmail[dot]com](mailto:msvaidyanathan1729[at]gmail[dot]com)
 
+## Citation
+
+If you found this useful please cite using [DOI: 10.5281/zenodo.24117577]
 
 ## License
 
